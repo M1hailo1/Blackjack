@@ -100,14 +100,25 @@ body {
   justify-content: space-around;
 }
 
+.right-side-dealer img,
+.right-side-player img {
+  height: var(--card-height);
+}
+
 .cards-dealer,
 .cards-player {
   width: 80%;
   height: calc(var(--card-height) * 1.1);
   border: solid 3px var(--text-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
 }
 
-.score-dealer {
+.score-dealer,
+.score-player {
+  font-size: 2rem;
 }
 
 .h-player {
@@ -116,7 +127,33 @@ body {
   left: 20px;
 }
 
-.score-player {
+.chips-player {
+  position: absolute;
+  width: 28%;
+  height: 20%;
+  left: 20px;
+  bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+.chip {
+  width: 30%;
+  height: 75px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: double 5px var(--text-color);
+  background-color: var(--accent-1);
+  transition: all 150ms;
+}
+
+.chip:hover {
+  background-color: var(--text-color);
+  color: var(--accent-1);
+  border: double 5px var(--accent-1);
 }
 
 .result-display {
@@ -127,11 +164,22 @@ body {
   left: 20px;
   top: 50%;
   transform: translate(0%, -50%);
+  color: var(--text-color);
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 40px;
 }
 
 .right-side {
   width: 25%;
   height: 100%;
+}
+
+.deck-image-div {
+  width: 100%;
+  height: 50%;
   position: relative;
 }
 
@@ -140,8 +188,8 @@ body {
 .deck-image-third {
   position: absolute;
   height: var(--card-height);
-  right: 30px;
-  top: 30%;
+  left: 50%;
+  top: 50%;
 }
 
 .deck-image {
@@ -165,21 +213,31 @@ img {
 .play-buttons {
   width: 100%;
   height: 50%;
-  position: absolute;
-  bottom: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-evenly;
 }
 
+.start-game-button,
 .hit-button,
 .stand-button,
-.reset-button {
+.reset-button,
+.bet-button {
   width: 80%;
   height: 50px;
   background-color: var(--accent-1);
   color: var(--text-color);
   border: none;
   font-size: 1.8rem;
+  transition: all 150ms;
+}
+
+.start-game-button:hover,
+.hit-button:hover,
+.stand-button:hover,
+.reset-button:hover,
+.bet-button:hover {
+  background-color: var(--text-color);
+  color: var(--accent-1);
 }

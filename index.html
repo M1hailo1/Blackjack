@@ -8,7 +8,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BlackJack MM</title>
     <link rel="stylesheet" href="style.css" />
-    <script src="main.js" defer></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -16,6 +15,7 @@
       href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap"
       rel="stylesheet"
     />
+    <script src="main.js" defer></script>
   </head>
   <body>
     <div class="table">
@@ -26,10 +26,13 @@
             quit before <br />winning <br />
             BIG!
           </h2>
-          <button class="reset-button">Reset</button>
+          <button class="start-game-button js-start-game-button">
+            Start Game
+          </button>
+          <button class="reset-button js-reset-button">Reset</button>
           <div class="balance">
             Balance: <br />
-            <span class="balance-value">0</span> <br />dabloons
+            <span class="balance-value js-balance-value">0</span> <br />dabloons
           </div>
         </div>
 
@@ -37,47 +40,57 @@
           <div class="dealer">
             <h2 class="h-dealer">Dealer</h2>
             <div class="right-side-dealer">
-              <div class="cards-dealer"></div>
+              <div class="cards-dealer js-cards-dealer"></div>
               <div class="score-dealer">
-                <span class="score-value-dealer">0</span>
+                <span class="score-value-dealer js-score-value-dealer">0</span>
               </div>
             </div>
           </div>
 
           <div class="result-display">
-            <h2 class="result-text"></h2>
+            <h2 class="result-text js-result-text"></h2>
           </div>
 
           <div class="player">
             <h2 class="h-player">Player</h2>
+            <div class="chips-player">
+              <div class="chip js-chip-one-hundred">100</div>
+              <div class="chip js-chip-two-hundred">200</div>
+              <div class="chip js-chip-five-hundred">500</div>
+            </div>
+
             <div class="right-side-player">
               <div class="score-player">
-                <span class="score-value-player">0</span>
+                <span class="score-value-player js-score-value-player">0</span>
               </div>
-              <div class="cards-player"></div>
+              <div class="cards-player js-cards-player"></div>
             </div>
           </div>
         </div>
 
         <div class="right-side">
-          <img
-            class="deck-image"
-            src="Images/svg_playing_cards/backs/blue.svg"
-            alt=""
-          />
-          <img
-            class="deck-image-second"
-            src="Images/svg_playing_cards/backs/blue.svg"
-            alt=""
-          />
-          <img
-            class="deck-image-third"
-            src="Images/svg_playing_cards/backs/blue.svg"
-            alt=""
-          />
+          <div class="deck-image-div">
+            <img
+              class="deck-image"
+              src="Images/svg_playing_cards/backs/blue.svg"
+              alt="deckimg"
+            />
+            <img
+              class="deck-image-second"
+              src="Images/svg_playing_cards/backs/blue.svg"
+              alt="deckimg"
+            />
+            <img
+              class="deck-image-third"
+              src="Images/svg_playing_cards/backs/blue.svg"
+              alt="deckimg"
+            />
+          </div>
+
           <div class="play-buttons">
-            <button class="hit-button">Hit</button>
-            <button class="stand-button">Stand</button>
+            <button class="hit-button js-hit-button">Hit</button>
+            <button class="stand-button js-stand-button">Stand</button>
+            <button class="bet-button js-bet-button">Bet</button>
           </div>
         </div>
       </div>
