@@ -18,6 +18,8 @@ const chipTwoHundred = document.querySelector(".js-chip-two-hundred");
 const chipFiveHundred = document.querySelector(".js-chip-five-hundred");
 
 let canHit = false;
+let stand = false;
+let standFunctionCalled = false;
 
 let balance = 5000;
 let turnCounter = 0;
@@ -73,6 +75,8 @@ function startGame() {
   renderHands();
   turnCounter++;
   canHit = true;
+  resultDisplay.textContent = "Game started! You can hit or stand.";
+  resultHandler();
 }
 
 function renderHands() {
@@ -132,17 +136,15 @@ function loadValue() {
 }
 
 function dealCard() {
-  let card = [];
   if (deck.length === 0) {
     buildDeckArray();
     shuffleDeck();
   }
   if (turnCounter === 0) {
-    card = deck.splice(0, 2);
+    return deck.splice(0, 2);
   } else {
-    card = deck.pop();
+    return deck.pop();
   }
-  return card;
 }
 
 function hitFunction() {
@@ -150,16 +152,48 @@ function hitFunction() {
     playerHand.push(dealCard());
     loadValue();
     renderHands();
-    if (playerValue > 20) {
-      resultDisplay.textContent = "You busted! Dealer wins.";
-      canHit = false;
-      turnCounter = 0;
+  }
+  resultHandler();
+}
+
+function resultHandler() {
+  if (playerValue === 21 && standFunctionCalled === false) {
+    standFunctionCalled = true;
+    standFunction();
+  }
+  if (dealerValue >= 17 && dealerValue < playerValue) {
+    resultDisplay.textContent = "You win!";
+    canHit = false;
+    turnCounter = 0;
+  }
+  if (playerValue > 21) {
+    resultDisplay.textContent = "You busted! Dealer wins.";
+    canHit = false;
+    turnCounter = 0;
+  }
+  if (dealerValue > 21) {
+    resultDisplay.textContent = "Dealer busted! You win!";
+    if (playerValue === 21 && playerHand.length === 2) {
+      resultDisplay.textContent += " Blackjack!";
     }
+  } else if (dealerValue > playerValue && stand) {
+    resultDisplay.textContent = "Dealer wins!";
+  } else if (dealerValue < playerValue && stand) {
+    resultDisplay.textContent = "You win!";
+    if (playerValue === 21 && playerHand.length === 2) {
+      resultDisplay.textContent += " Blackjack!";
+    }
+  }
+  if (dealerValue === playerValue && playerValue === 21) {
+    resultDisplay.textContent = "It's a tie!";
+  } else if (dealerValue === playerValue && stand) {
+    resultDisplay.textContent = "It's a tie!";
   }
 }
 
 function standFunction() {
   canHit = false;
+  stand = true;
 
   while (dealerValue < 17) {
     dealerHand.push(dealCard());
@@ -167,15 +201,7 @@ function standFunction() {
     renderHands();
   }
 
-  if (dealerValue > 21) {
-    resultDisplay.textContent = "Dealer busted! You win!";
-  } else if (dealerValue > playerValue) {
-    resultDisplay.textContent = "Dealer wins!";
-  } else if (dealerValue < playerValue) {
-    resultDisplay.textContent = "You win!";
-  } else {
-    resultDisplay.textContent = "It's a tie!";
-  }
+  resultHandler();
 }
 
 startGameButton.addEventListener("click", () => {
@@ -198,10 +224,11 @@ standButton.addEventListener("click", () => {
 //reset game napravi
 //rad sa balansom napravi
 //chips da oduzimaju
-//betting system napravi
 //napravi da ace bude 1 ili 11
+
 //stavi before ili after element na ono umesto bordera
 //media queries napravi
 //napravi animaciju za izvlacenje karti i to
 //mozda da napraviš da se kartice okreću
 //mozda hover effect na celu stranu
+//vrv redesign da uradis
