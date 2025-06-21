@@ -84,24 +84,46 @@ function renderHands() {
   dealerCardsDisplay.innerHTML = "";
   playerCardsDisplay.innerHTML = "";
   let pixelOffset = 0;
+  let pixelOffsetY = 0;
+  let pixelRotation = 0;
 
-  dealerHand.forEach((card) => {
+  dealerHand.forEach((card, index) => {
     const cardDealerElement = document.createElement("img");
     cardDealerElement.src = `Images/svg_playing_cards/fronts/${card}.svg`;
     cardDealerElement.style.position = "absolute";
     pixelOffset += 50;
+    if (index % 2 === 0) {
+      pixelOffsetY = 0;
+      pixelRotation = 2;
+    } else {
+      pixelOffsetY += 10;
+      pixelRotation = -2;
+    }
     cardDealerElement.style.left = `${pixelOffset}px`;
+    cardDealerElement.style.top = `${pixelOffsetY}px`;
+    cardDealerElement.style.transform = `rotate(${pixelRotation}deg)`;
     dealerCardsDisplay.appendChild(cardDealerElement);
   });
 
   pixelOffset = 0;
+  pixelOffsetY = 0;
+  pixelRotation = 0;
 
-  playerHand.forEach((card) => {
+  playerHand.forEach((card, index) => {
     const cardPlayerElement = document.createElement("img");
     cardPlayerElement.src = `Images/svg_playing_cards/fronts/${card}.svg`;
     cardPlayerElement.style.position = "absolute";
     pixelOffset += 50;
+    if (index % 2 === 0) {
+      pixelOffsetY = 0;
+      pixelRotation = 2;
+    } else {
+      pixelOffsetY += 10;
+      pixelRotation = -2;
+    }
     cardPlayerElement.style.left = `${pixelOffset}px`;
+    cardPlayerElement.style.top = `${pixelOffsetY}px`;
+    cardPlayerElement.style.transform = `rotate(${pixelRotation}deg)`;
     playerCardsDisplay.appendChild(cardPlayerElement);
   });
 
@@ -243,15 +265,13 @@ standButton.addEventListener("click", () => {
   }
 });
 
-//napravi da ace bude 1 ili 11
 //napravi hidden card za dilera
 //reset game napravi
 //rad sa balansom napravi
-//chips da oduzimaju
+//napravi animaciju za izvlacenje karti i to
 
 //stavi before ili after element na ono umesto bordera ili neki welcome screen
 //media queries napravi
-//napravi animaciju za izvlacenje karti i to
 //mozda da napraviš da se kartice okreću
 //mozda hover effect na celu stranu
 //vrv redesign da uradis
