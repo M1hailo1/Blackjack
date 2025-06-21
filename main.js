@@ -72,6 +72,7 @@ function startGame() {
   dealerHand = dealCard();
   playerHand = dealCard();
   loadValue();
+  handleAces();
   renderHands();
   turnCounter++;
   canHit = true;
@@ -148,12 +149,33 @@ function dealCard() {
 }
 
 function hitFunction() {
+  resultDisplay.textContent = "You can hit or stand.";
   if (canHit) {
     playerHand.push(dealCard());
     loadValue();
     renderHands();
+    handleAces();
   }
   resultHandler();
+}
+
+function handleAces() {
+  if (playerValue > 21) {
+    playerHand.forEach((card) => {
+      if (card.split("_")[1] === "ace" && playerValue > 21) {
+        playerValue -= 10;
+      }
+    });
+  }
+
+  if (dealerValue > 21) {
+    dealerHand.forEach((card) => {
+      if (card.split("_")[1] === "ace" && dealerValue > 21) {
+        dealerValue -= 10;
+      }
+    });
+  }
+  renderHands();
 }
 
 function resultHandler() {
@@ -198,6 +220,7 @@ function standFunction() {
   while (dealerValue < 17) {
     dealerHand.push(dealCard());
     loadValue();
+    handleAces();
     renderHands();
   }
 
@@ -220,13 +243,13 @@ standButton.addEventListener("click", () => {
   }
 });
 
+//napravi da ace bude 1 ili 11
 //napravi hidden card za dilera
 //reset game napravi
 //rad sa balansom napravi
 //chips da oduzimaju
-//napravi da ace bude 1 ili 11
 
-//stavi before ili after element na ono umesto bordera
+//stavi before ili after element na ono umesto bordera ili neki welcome screen
 //media queries napravi
 //napravi animaciju za izvlacenje karti i to
 //mozda da napraviš da se kartice okreću
