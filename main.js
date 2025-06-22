@@ -20,6 +20,7 @@ const chipFiveHundred = document.querySelector(".js-chip-five-hundred");
 let canHit = false;
 let stand = false;
 let standFunctionCalled = false;
+let revealDealerCard = false;
 
 let balance = 5000;
 let turnCounter = 0;
@@ -67,6 +68,7 @@ function shuffleDeck() {
 function startGame() {
   resultDisplay.textContent = "";
   balanceDisplay.textContent = balance;
+  revealDealerCard = false;
   buildDeckArray();
   shuffleDeck();
   dealerHand = dealCard();
@@ -83,13 +85,12 @@ function startGame() {
 function renderHands() {
   dealerCardsDisplay.innerHTML = "";
   playerCardsDisplay.innerHTML = "";
-  let pixelOffset = 0;
+  let pixelOffset = 25;
   let pixelOffsetY = 0;
   let pixelRotation = 0;
 
   dealerHand.forEach((card, index) => {
     const cardDealerElement = document.createElement("img");
-    cardDealerElement.src = `Images/svg_playing_cards/fronts/${card}.svg`;
     cardDealerElement.style.position = "absolute";
     pixelOffset += 50;
     if (index % 2 === 0) {
@@ -102,10 +103,17 @@ function renderHands() {
     cardDealerElement.style.left = `${pixelOffset}px`;
     cardDealerElement.style.top = `${pixelOffsetY}px`;
     cardDealerElement.style.transform = `rotate(${pixelRotation}deg)`;
+
+    if (index === 0 && !revealDealerCard) {
+      cardDealerElement.src = "Images/svg_playing_cards/backs/blue.svg";
+    } else {
+      cardDealerElement.src = `Images/svg_playing_cards/fronts/${card}.svg`;
+    }
+
     dealerCardsDisplay.appendChild(cardDealerElement);
   });
 
-  pixelOffset = 0;
+  pixelOffset = 25;
   pixelOffsetY = 0;
   pixelRotation = 0;
 
@@ -127,7 +135,23 @@ function renderHands() {
     playerCardsDisplay.appendChild(cardPlayerElement);
   });
 
-  dealerValueDisplay.textContent = dealerValue;
+  if (revealDealerCard) {
+    dealerValueDisplay.textContent = dealerValue;
+  } else {
+    let hiddenValue = 0;
+    dealerHand.slice(1).forEach((card) => {
+      let value = card.split("_")[1];
+      if (value === "jack" || value === "queen" || value === "king") {
+        hiddenValue += 10;
+      } else if (value === "ace") {
+        hiddenValue += 11;
+      } else if (!isNaN(value)) {
+        hiddenValue += parseInt(value);
+      }
+    });
+    dealerValueDisplay.textContent = hiddenValue;
+  }
+
   playerValueDisplay.textContent = playerValue;
 }
 
@@ -206,6 +230,8 @@ function resultHandler() {
     standFunction();
   }
   if (dealerValue >= 17 && dealerValue < playerValue) {
+    revealDealerCard = true;
+    renderHands();
     resultDisplay.textContent = "You win!";
     canHit = false;
     turnCounter = 0;
@@ -213,7 +239,9 @@ function resultHandler() {
   if (playerValue > 21) {
     resultDisplay.textContent = "You busted! Dealer wins.";
     canHit = false;
+    revealDealerCard = true;
     turnCounter = 0;
+    renderHands();
   }
   if (dealerValue > 21) {
     resultDisplay.textContent = "Dealer busted! You win!";
@@ -238,6 +266,7 @@ function resultHandler() {
 function standFunction() {
   canHit = false;
   stand = true;
+  revealDealerCard = true;
 
   while (dealerValue < 17) {
     dealerHand.push(dealCard());
@@ -246,6 +275,7 @@ function standFunction() {
     renderHands();
   }
 
+  renderHands();
   resultHandler();
 }
 
@@ -265,7 +295,6 @@ standButton.addEventListener("click", () => {
   }
 });
 
-//napravi hidden card za dilera
 //reset game napravi
 //rad sa balansom napravi
 //napravi animaciju za izvlacenje karti i to
