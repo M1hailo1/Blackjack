@@ -240,3 +240,11 @@ img {
   background-color: var(--text-color);
   color: var(--accent-1);
 }
+
+.start-game-button:active,
+.hit-button:active,
+.stand-button:active,
+.reset-button:active,
+.bet-button:active {
+  scale: 1.08;
+}

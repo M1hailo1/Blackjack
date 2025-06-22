@@ -32,6 +32,8 @@ let playerHand = [];
 let dealerHand = [];
 let deck = [];
 
+const buttonClickAudio = new Audio("Audios/buttonClick.mp3");
+
 function buildDeckArray() {
   const types = ["hearts", "diamonds", "clubs", "spades"];
   const values = [
@@ -279,17 +281,26 @@ function standFunction() {
   resultHandler();
 }
 
+function playButtonSound() {
+  buttonClickAudio.volume = 0.4;
+  buttonClickAudio.currentTime = 0;
+  buttonClickAudio.play();
+}
+
 startGameButton.addEventListener("click", () => {
+  playButtonSound();
   startGame();
 });
 
 hitButton.addEventListener("click", () => {
+  playButtonSound();
   if (turnCounter > 0 && canHit) {
     hitFunction();
   }
 });
 
 standButton.addEventListener("click", () => {
+  playButtonSound();
   if (turnCounter > 0) {
     standFunction();
   }
@@ -297,7 +308,10 @@ standButton.addEventListener("click", () => {
 
 //reset game napravi
 //rad sa balansom napravi
-//napravi animaciju za izvlacenje karti i to
+//napravi animaciju za izvlacenje karti
+//dodaj audio na button clicks i na dobitak i gubitak
+//kad kliknes na chip da se postavi chip u novi div sa position absoulte
+// i onda kad se klikne u tom divu samo da nestane
 
 //stavi before ili after element na ono umesto bordera ili neki welcome screen
 //media queries napravi
