@@ -8,6 +8,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BlackJack MM</title>
     <link rel="stylesheet" href="style.css" />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="Images/svg_playing_cards/other/clubs_ace_large_pip.svg"
+    />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -29,7 +34,12 @@
           <button class="start-game-button js-start-game-button">
             Start Game
           </button>
-          <button class="reset-button js-reset-button">Reset</button>
+          <button class="reset-button js-reset-button">Reset Game</button>
+          <div class="bet-amount-display">
+            Bet amount:
+            <p class="bet-amount js-bet-amount">0</p>
+            dabloons
+          </div>
           <div class="balance">
             Balance: <br />
             <span class="balance-value js-balance-value">5000</span>
@@ -53,6 +63,7 @@
           </div>
 
           <div class="player">
+            <div class="bet-display js-bet-display"></div>
             <h2 class="h-player">Player</h2>
             <div class="chips-player">
               <div class="chip js-chip-one-hundred">100</div>

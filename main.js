@@ -13,17 +13,25 @@ const playerCardsDisplay = document.querySelector(".js-cards-player");
 const dealerValueDisplay = document.querySelector(".js-score-value-dealer");
 const playerValueDisplay = document.querySelector(".js-score-value-player");
 
+const betDisplay = document.querySelector(".js-bet-display");
+const betAmountDisplay = document.querySelector(".js-bet-amount");
 const chipHundred = document.querySelector(".js-chip-one-hundred");
 const chipTwoHundred = document.querySelector(".js-chip-two-hundred");
 const chipFiveHundred = document.querySelector(".js-chip-five-hundred");
 
+let gameStarted = false;
+let roundStarted = false;
 let canHit = false;
 let stand = false;
 let standFunctionCalled = false;
 let revealDealerCard = false;
 
+let bet = 0;
 let balance = 5000;
 let turnCounter = 0;
+let rotateChipValue = 0;
+let rotateChipValue200 = 0;
+let rotateChipValue500 = 0;
 
 let playerValue;
 let dealerValue;
@@ -68,20 +76,25 @@ function shuffleDeck() {
 }
 
 function startGame() {
-  resultDisplay.textContent = "";
-  balanceDisplay.textContent = balance;
-  revealDealerCard = false;
-  buildDeckArray();
-  shuffleDeck();
-  dealerHand = dealCard();
-  playerHand = dealCard();
-  loadValue();
-  handleAces();
-  renderHands();
-  turnCounter++;
-  canHit = true;
-  resultDisplay.textContent = "Game started! You can hit or stand.";
-  resultHandler();
+  if (gameStarted === false) {
+    playButtonSound();
+    gameStarted = true;
+    roundStarted = true;
+    resultDisplay.textContent = "";
+    balanceDisplay.textContent = balance;
+    revealDealerCard = false;
+    buildDeckArray();
+    shuffleDeck();
+    dealerHand = dealCard();
+    playerHand = dealCard();
+    loadValue();
+    handleAces();
+    renderHands();
+    turnCounter++;
+    canHit = true;
+    resultDisplay.textContent = "Game started! You can hit or stand.";
+    resultHandler();
+  }
 }
 
 function renderHands() {
@@ -199,6 +212,7 @@ function dealCard() {
 function hitFunction() {
   resultDisplay.textContent = "You can hit or stand.";
   if (canHit) {
+    turnCounter++;
     playerHand.push(dealCard());
     loadValue();
     renderHands();
@@ -226,18 +240,35 @@ function handleAces() {
   renderHands();
 }
 
+function resetVariables() {
+  roundStarted = false;
+  standFunctionCalled = false;
+  canHit = false;
+  stand = false;
+  revealDealerCard = false;
+  turnCounter = 0;
+}
+
 function resultHandler() {
   if (playerValue === 21 && standFunctionCalled === false) {
     standFunctionCalled = true;
     standFunction();
   }
-  if (dealerValue >= 17 && dealerValue < playerValue) {
-    revealDealerCard = true;
-    renderHands();
-    resultDisplay.textContent = "You win!";
-    canHit = false;
-    turnCounter = 0;
-  }
+
+  // if (dealerValue >= 17 && dealerValue < playerValue && turnCounter === 1) {
+  //   revealDealerCard = true;
+  //   renderHands();
+  //   canHit = false;
+  //   turnCounter = 0;
+  //   resultDisplay.textContent = "You win!";
+  //   balance = balance + bet * 2;
+  //   balanceDisplay.textContent = balance;
+  //   if (playerValue === 21 && playerHand.length === 2) {
+  //     resultDisplay.textContent += " Blackjack!";
+  //   }
+  //   return;
+  // }
+
   if (playerValue > 21) {
     resultDisplay.textContent = "You busted! Dealer wins.";
     canHit = false;
@@ -245,23 +276,37 @@ function resultHandler() {
     turnCounter = 0;
     renderHands();
   }
-  if (dealerValue > 21) {
+
+  if (dealerValue > 21 && playerValue <= 21) {
     resultDisplay.textContent = "Dealer busted! You win!";
+    balance = balance + bet * 2;
+    balanceDisplay.textContent = balance;
     if (playerValue === 21 && playerHand.length === 2) {
       resultDisplay.textContent += " Blackjack!";
     }
+    resetVariables();
   } else if (dealerValue > playerValue && stand) {
     resultDisplay.textContent = "Dealer wins!";
+    resetVariables();
   } else if (dealerValue < playerValue && stand) {
     resultDisplay.textContent = "You win!";
+    balance = balance + bet * 2;
+    balanceDisplay.textContent = balance;
     if (playerValue === 21 && playerHand.length === 2) {
       resultDisplay.textContent += " Blackjack!";
     }
+    resetVariables();
+    return;
   }
+
   if (dealerValue === playerValue && playerValue === 21) {
     resultDisplay.textContent = "It's a tie!";
+    balance = balance + bet;
+    balanceDisplay.textContent = balance;
   } else if (dealerValue === playerValue && stand) {
     resultDisplay.textContent = "It's a tie!";
+    balance = balance + bet;
+    balanceDisplay.textContent = balance;
   }
 }
 
@@ -269,6 +314,7 @@ function standFunction() {
   canHit = false;
   stand = true;
   revealDealerCard = true;
+  turnCounter++;
 
   while (dealerValue < 17) {
     dealerHand.push(dealCard());
@@ -281,14 +327,122 @@ function standFunction() {
   resultHandler();
 }
 
+function betButtonFunction() {
+  if (bet > balance) {
+    bet = balance;
+    betAmountDisplay.textContent = bet;
+  }
+}
+
 function playButtonSound() {
   buttonClickAudio.volume = 0.4;
   buttonClickAudio.currentTime = 0;
   buttonClickAudio.play();
 }
 
+chipHundred.addEventListener("click", () => {
+  if (!roundStarted) {
+    playButtonSound();
+    if (balance >= 100) {
+      balance -= 100;
+      bet += 100;
+      betAmountDisplay.textContent = bet;
+      balanceDisplay.textContent = balance;
+      const betChip100 = document.createElement("div");
+      betChip100.classList.add("chip");
+      betChip100.style.position = "absolute";
+      betChip100.style.left = "5px";
+      betChip100.style.transform = `rotate(${rotateChipValue}deg)`;
+      rotateChipValue += 15;
+      betChip100.textContent = "100";
+      betDisplay.appendChild(betChip100);
+
+      betChip100.addEventListener("click", () => {
+        if (!roundStarted) {
+          playButtonSound();
+          betChip100.remove();
+          balance += 100;
+          bet -= 100;
+          betAmountDisplay.textContent = bet;
+          balanceDisplay.textContent = balance;
+          rotateChipValue -= 15;
+        }
+      });
+    } else {
+      alert("Not enough balance!");
+    }
+  }
+});
+
+chipTwoHundred.addEventListener("click", () => {
+  if (!roundStarted) {
+    playButtonSound();
+    if (balance >= 200) {
+      balance -= 200;
+      bet += 200;
+      betAmountDisplay.textContent = bet;
+      balanceDisplay.textContent = balance;
+      const betChip200 = document.createElement("div");
+      betChip200.classList.add("chip");
+      betChip200.style.position = "absolute";
+      betChip200.style.left = "35%";
+      betChip200.style.transform = `rotate(${rotateChipValue200}deg)`;
+      rotateChipValue200 += 15;
+      betChip200.textContent = "200";
+      betDisplay.appendChild(betChip200);
+
+      betChip200.addEventListener("click", () => {
+        if (!roundStarted) {
+          playButtonSound();
+          betChip200.remove();
+          balance += 200;
+          bet -= 200;
+          betAmountDisplay.textContent = bet;
+          balanceDisplay.textContent = balance;
+          rotateChipValue200 -= 15;
+        }
+      });
+    } else {
+      alert("Not enough balance!");
+    }
+  }
+});
+
+chipFiveHundred.addEventListener("click", () => {
+  if (!roundStarted) {
+    playButtonSound();
+    if (balance >= 500) {
+      balance -= 500;
+      bet += 500;
+      betAmountDisplay.textContent = bet;
+      balanceDisplay.textContent = balance;
+      const betChip500 = document.createElement("div");
+      betChip500.classList.add("chip");
+      betChip500.style.position = "absolute";
+      betChip500.style.left = "67.5%";
+      betChip500.style.transform = `rotate(${rotateChipValue500}deg)`;
+      rotateChipValue500 += 15;
+      betChip500.textContent = "500";
+      betDisplay.appendChild(betChip500);
+
+      betChip500.addEventListener("click", () => {
+        if (!roundStarted) {
+          playButtonSound();
+          betChip500.remove();
+          balance += 500;
+          bet -= 500;
+          betAmountDisplay.textContent = bet;
+          balanceDisplay.textContent = balance;
+          rotateChipValue500 -= 15;
+        }
+      });
+    } else {
+      alert("Not enough balance!");
+    }
+  }
+});
+
 startGameButton.addEventListener("click", () => {
-  playButtonSound();
   startGame();
 });
 
@@ -307,13 +461,14 @@ standButton.addEventListener("click", () => {
 });
 
 //reset game napravi
-//rad sa balansom napravi
+//dodaj round progression dok se ne resetuje igra makar igrao sa 0 balansa
 //napravi animaciju za izvlacenje karti
 //dodaj audio na button clicks i na dobitak i gubitak
 //kad kliknes na chip da se postavi chip u novi div sa position absoulte
 // i onda kad se klikne u tom divu samo da nestane
-
 //stavi before ili after element na ono umesto bordera ili neki welcome screen
+// i nek se pojavi kad se resetuje igra dok se opet ne klikne start game
+
 //media queries napravi
 //mozda da napraviš da se kartice okreću
 //mozda hover effect na celu stranu

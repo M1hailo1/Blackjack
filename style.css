@@ -117,6 +117,24 @@
   font-size: 2rem;
 }
 
+.bet-display {
+  position: absolute;
+  width: 28%;
+  height: 20%;
+  left: 20px;
+  bottom: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+.bet-amount-display {
+  color: var(--text-color);
+  font-size: 1.5rem;
+  text-align: center;
+  line-height: 40px;
+}
+
 .h-player {
   position: absolute;
   top: 60%;
@@ -135,8 +153,8 @@
 }
 
 .chip {
-  width: 30%;
-  height: 75px;
+  width: 60px;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
