@@ -248,6 +248,9 @@ function resetVariables() {
   stand = false;
   revealDealerCard = false;
   turnCounter = 0;
+  bet = 0;
+  betAmountDisplay.textContent = bet;
+  betDisplay.innerHTML = "";
 }
 
 function resultHandler() {
@@ -330,106 +333,62 @@ function playButtonSound() {
   buttonClickAudio.play();
 }
 
-chipHundred.addEventListener("click", () => {
+function chipButtonFunction(value, rotateValue, leftPosition) {
   if (!roundStarted) {
     playButtonSound();
-    if (balance >= 100) {
-      balance -= 100;
-      bet += 100;
+    if (balance >= value) {
+      balance -= value;
+      bet += value;
       betAmountDisplay.textContent = bet;
       balanceDisplay.textContent = balance;
-      const betChip100 = document.createElement("div");
-      betChip100.classList.add("chip");
-      betChip100.style.position = "absolute";
-      betChip100.style.left = "5px";
-      betChip100.style.transform = `rotate(${rotateChipValue}deg)`;
-      rotateChipValue += 15;
-      betChip100.textContent = "100";
-      betDisplay.appendChild(betChip100);
+      const betChip = document.createElement("div");
+      betChip.classList.add("chip");
+      betChip.dataset.value = value;
+      betChip.style.position = "absolute";
+      betChip.style.left = `${leftPosition}`;
+      betChip.style.transform = `rotate(${rotateValue}deg)`;
+      betChip.textContent = `${value}`;
+      betDisplay.appendChild(betChip);
 
-      betChip100.addEventListener("click", () => {
+      betChip.addEventListener("click", () => {
         if (!roundStarted) {
           playButtonSound();
-          betChip100.remove();
-          balance += 100;
-          bet -= 100;
+          betChip.remove();
+          balance += value;
+          bet -= value;
           betAmountDisplay.textContent = bet;
           balanceDisplay.textContent = balance;
-          rotateChipValue -= 15;
+          rotateValue -= 15;
         }
       });
     } else {
       alert("Not enough balance!");
     }
   }
+}
+
+chipHundred.addEventListener("click", () => {
+  if (!betDisplay.querySelector(".chip[data-value='100']")) {
+    rotateChipValue = 0;
+  }
+  chipButtonFunction(100, rotateChipValue, "7%");
+  rotateChipValue += 15;
 });
 
 chipTwoHundred.addEventListener("click", () => {
-  if (!roundStarted) {
-    playButtonSound();
-    if (balance >= 200) {
-      balance -= 200;
-      bet += 200;
-      betAmountDisplay.textContent = bet;
-      balanceDisplay.textContent = balance;
-      const betChip200 = document.createElement("div");
-      betChip200.classList.add("chip");
-      betChip200.style.position = "absolute";
-      betChip200.style.left = "35%";
-      betChip200.style.transform = `rotate(${rotateChipValue200}deg)`;
-      rotateChipValue200 += 15;
-      betChip200.textContent = "200";
-      betDisplay.appendChild(betChip200);
-
-      betChip200.addEventListener("click", () => {
-        if (!roundStarted) {
-          playButtonSound();
-          betChip200.remove();
-          balance += 200;
-          bet -= 200;
-          betAmountDisplay.textContent = bet;
-          balanceDisplay.textContent = balance;
-          rotateChipValue200 -= 15;
-        }
-      });
-    } else {
-      alert("Not enough balance!");
-    }
+  if (!betDisplay.querySelector(".chip[data-value='200']")) {
+    rotateChipValue200 = 0;
   }
+  chipButtonFunction(200, rotateChipValue200, "38%");
+  rotateChipValue200 += 15;
 });
 
 chipFiveHundred.addEventListener("click", () => {
-  if (!roundStarted) {
-    playButtonSound();
-    if (balance >= 500) {
-      balance -= 500;
-      bet += 500;
-      betAmountDisplay.textContent = bet;
-      balanceDisplay.textContent = balance;
-      const betChip500 = document.createElement("div");
-      betChip500.classList.add("chip");
-      betChip500.style.position = "absolute";
-      betChip500.style.left = "67.5%";
-      betChip500.style.transform = `rotate(${rotateChipValue500}deg)`;
-      rotateChipValue500 += 15;
-      betChip500.textContent = "500";
-      betDisplay.appendChild(betChip500);
-
-      betChip500.addEventListener("click", () => {
-        if (!roundStarted) {
-          playButtonSound();
-          betChip500.remove();
-          balance += 500;
-          bet -= 500;
-          betAmountDisplay.textContent = bet;
-          balanceDisplay.textContent = balance;
-          rotateChipValue500 -= 15;
-        }
-      });
-    } else {
-      alert("Not enough balance!");
-    }
+  if (!betDisplay.querySelector(".chip[data-value='500']")) {
+    rotateChipValue500 = 0;
   }
+  chipButtonFunction(500, rotateChipValue500, "69%");
+  rotateChipValue500 += 15;
 });
 
 startGameButton.addEventListener("click", () => {
@@ -486,6 +445,10 @@ betButton.addEventListener("click", () => {
   if (gameStarted === true) {
     if (roundStarted === false) {
       playButtonSound();
+      if (bet === 0) {
+        alert("Please place a bet before starting the game!");
+        return;
+      }
       dealerHand = [];
       playerHand = [];
       playerValue = 0;
@@ -500,28 +463,31 @@ betButton.addEventListener("click", () => {
       balanceDisplay.textContent = balance;
       canHit = true;
       revealDealerCard = false;
-      dealerHand = dealCard();
-      playerHand = dealCard();
-      loadValue();
-      handleAces();
-      roundStarted = true;
-      resultDisplay.textContent = "Game started! You can hit or stand.";
-      renderHands();
-      turnCounter++;
-      resultHandler();
+      resultDisplay.textContent = "Dealing cards...";
+      setTimeout(() => {
+        dealerHand = dealCard();
+        playerHand = dealCard();
+        loadValue();
+        handleAces();
+        roundStarted = true;
+        resultDisplay.textContent = "Game started! You can hit or stand.";
+        renderHands();
+        turnCounter++;
+        resultHandler();
+      }, 1200);
     }
   }
 });
 
-//imas bug sa balanceom fix it
+// stavi before ili after element na ono umesto bordera
+// start game samo da sklonio weclome i reset game da vrati start screen
+//  i bet da mora da bude bar 100
 
-// mozda da onemogucis da se klikne na bet kad je bet = 0
 // mozda da izgubis ako ti padnes na nulu sa balansom
 // dodaj funckije da uklonis redudanstonst
 
 //napravi animaciju za izvlacenje karti
 //dodaj audio na button clicks, audio za chips i na results
-//stavi before ili after element na ono umesto bordera ili neki welcome screen
 // i nek se pojavi kad se resetuje igra dok se opet ne klikne start game
 
 //media queries napravi
