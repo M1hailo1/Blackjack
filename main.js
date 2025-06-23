@@ -266,9 +266,7 @@ function resultHandler() {
     turnCounter = 0;
     resetVariables();
     renderHands();
-  }
-
-  if (dealerValue > 21 && playerValue <= 21) {
+  } else if (dealerValue > 21 && playerValue <= 21) {
     resultDisplay.textContent = "Dealer busted! You win!";
     balance = balance + bet * 2;
     balanceDisplay.textContent = balance;
@@ -318,13 +316,6 @@ function standFunction() {
 
   renderHands();
   resultHandler();
-}
-
-function betButtonFunction() {
-  if (bet > balance) {
-    bet = balance;
-    betAmountDisplay.textContent = bet;
-  }
 }
 
 function playButtonSound() {
@@ -446,8 +437,14 @@ betButton.addEventListener("click", () => {
     if (roundStarted === false) {
       playButtonSound();
       if (bet === 0) {
-        alert("Please place a bet before starting the game!");
-        return;
+        if (balance === 0) {
+          resultDisplay.textContent = "Game Over! Press Reset to start over.";
+          alert("You have no balance left! Please reset the game.");
+          return;
+        } else {
+          alert("Please place a bet before starting the game!");
+          return;
+        }
       }
       dealerHand = [];
       playerHand = [];
@@ -459,7 +456,6 @@ betButton.addEventListener("click", () => {
       playerValueDisplay.textContent = "";
       resultDisplay.textContent = "";
       renderHands();
-      betButtonFunction();
       balanceDisplay.textContent = balance;
       canHit = true;
       revealDealerCard = false;
@@ -479,16 +475,18 @@ betButton.addEventListener("click", () => {
   }
 });
 
-// stavi before ili after element na ono umesto bordera
-// start game samo da sklonio weclome i reset game da vrati start screen
-//  i bet da mora da bude bar 100
+// start game samo da skloni welcome i reset game da vrati start screen
 
-// mozda da izgubis ako ti padnes na nulu sa balansom
+// stavi before ili after element na ono umesto bordera
+
 // dodaj funckije da uklonis redudanstonst
 
-//napravi animaciju za izvlacenje karti
-//dodaj audio na button clicks, audio za chips i na results
-// i nek se pojavi kad se resetuje igra dok se opet ne klikne start game
+// napravi animaciju za izvlacenje karti
 
-//media queries napravi
-//mozda da napraviš da se hidden karta okrene
+// dodaj audio na button clicks, audio za chips i na results
+
+// dodaj animaciju za chips
+
+// media queries napravi
+
+// mozda da napraviš da se hidden karta okrene
