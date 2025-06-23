@@ -43,6 +43,7 @@ let deck = [];
 const buttonClickAudio = new Audio("Audios/buttonClick.mp3");
 
 function buildDeckArray() {
+  deck = [];
   const types = ["hearts", "diamonds", "clubs", "spades"];
   const values = [
     "2",
@@ -255,26 +256,14 @@ function resultHandler() {
     standFunction();
   }
 
-  // if (dealerValue >= 17 && dealerValue < playerValue && turnCounter === 1) {
-  //   revealDealerCard = true;
-  //   renderHands();
-  //   canHit = false;
-  //   turnCounter = 0;
-  //   resultDisplay.textContent = "You win!";
-  //   balance = balance + bet * 2;
-  //   balanceDisplay.textContent = balance;
-  //   if (playerValue === 21 && playerHand.length === 2) {
-  //     resultDisplay.textContent += " Blackjack!";
-  //   }
-  //   return;
-  // }
-
   if (playerValue > 21) {
     resultDisplay.textContent = "You busted! Dealer wins.";
     canHit = false;
     revealDealerCard = true;
     turnCounter = 0;
+    resetVariables();
     renderHands();
+    return;
   }
 
   if (dealerValue > 21 && playerValue <= 21) {
@@ -303,10 +292,12 @@ function resultHandler() {
     resultDisplay.textContent = "It's a tie!";
     balance = balance + bet;
     balanceDisplay.textContent = balance;
+    resetVariables();
   } else if (dealerValue === playerValue && stand) {
     resultDisplay.textContent = "It's a tie!";
     balance = balance + bet;
     balanceDisplay.textContent = balance;
+    resetVariables();
   }
 }
 
@@ -447,29 +438,58 @@ startGameButton.addEventListener("click", () => {
 });
 
 hitButton.addEventListener("click", () => {
-  playButtonSound();
   if (turnCounter > 0 && canHit) {
+    playButtonSound();
     hitFunction();
   }
 });
 
 standButton.addEventListener("click", () => {
-  playButtonSound();
   if (turnCounter > 0) {
+    playButtonSound();
     standFunction();
   }
 });
 
+betButton.addEventListener("click", () => {
+  if (gameStarted === true) {
+    if (roundStarted === false) {
+      playButtonSound();
+      dealerHand = [];
+      playerHand = [];
+      playerValue = 0;
+      dealerValue = 0;
+      dealerCardsDisplay.innerHTML = "";
+      playerCardsDisplay.innerHTML = "";
+      dealerValueDisplay.textContent = "";
+      playerValueDisplay.textContent = "";
+      resultDisplay.textContent = "";
+      renderHands();
+      betButtonFunction();
+      balanceDisplay.textContent = balance;
+      canHit = true;
+      revealDealerCard = false;
+      dealerHand = dealCard();
+      playerHand = dealCard();
+      loadValue();
+      handleAces();
+      roundStarted = true;
+      resultDisplay.textContent = "Game started! You can hit or stand.";
+      renderHands();
+      turnCounter++;
+      resultHandler();
+    }
+  }
+});
+
 //reset game napravi
-//dodaj round progression dok se ne resetuje igra makar igrao sa 0 balansa
+
 //napravi animaciju za izvlacenje karti
-//dodaj audio na button clicks i na dobitak i gubitak
-//kad kliknes na chip da se postavi chip u novi div sa position absoulte
-// i onda kad se klikne u tom divu samo da nestane
+//dodaj audio na button clicks, audio za chips i na results
 //stavi before ili after element na ono umesto bordera ili neki welcome screen
 // i nek se pojavi kad se resetuje igra dok se opet ne klikne start game
 
 //media queries napravi
-//mozda da napraviš da se kartice okreću
+//mozda da napraviš da se hidden karta okrene
 //mozda hover effect na celu stranu
 //vrv redesign da uradis
