@@ -1,5 +1,5 @@
 const startGameButton = document.querySelector(".js-start-game-button");
-const resetgameButton = document.querySelector(".js-reset-button");
+const resetGameButton = document.querySelector(".js-reset-button");
 const hitButton = document.querySelector(".js-hit-button");
 const standButton = document.querySelector(".js-stand-button");
 const betButton = document.querySelector(".js-bet-button");
@@ -263,7 +263,6 @@ function resultHandler() {
     turnCounter = 0;
     resetVariables();
     renderHands();
-    return;
   }
 
   if (dealerValue > 21 && playerValue <= 21) {
@@ -451,6 +450,38 @@ standButton.addEventListener("click", () => {
   }
 });
 
+resetGameButton.addEventListener("click", () => {
+  playButtonSound();
+  gameStarted = false;
+  roundStarted = false;
+  canHit = false;
+  stand = false;
+  standFunctionCalled = false;
+  revealDealerCard = false;
+  turnCounter = 0;
+
+  playerHand = [];
+  dealerHand = [];
+  deck = [];
+
+  bet = 0;
+  betAmountDisplay.textContent = bet;
+  rotateChipValue = 0;
+  rotateChipValue200 = 0;
+  rotateChipValue500 = 0;
+
+  betDisplay.innerHTML = "";
+
+  dealerCardsDisplay.innerHTML = "";
+  playerCardsDisplay.innerHTML = "";
+  dealerValueDisplay.textContent = "";
+  playerValueDisplay.textContent = "";
+  resultDisplay.textContent = "Game reset! Click Start Game to play again.";
+
+  balance = 5000;
+  balanceDisplay.textContent = balance;
+});
+
 betButton.addEventListener("click", () => {
   if (gameStarted === true) {
     if (roundStarted === false) {
@@ -482,7 +513,11 @@ betButton.addEventListener("click", () => {
   }
 });
 
-//reset game napravi
+//imas bug sa balanceom fix it
+
+// mozda da onemogucis da se klikne na bet kad je bet = 0
+// mozda da izgubis ako ti padnes na nulu sa balansom
+// dodaj funckije da uklonis redudanstonst
 
 //napravi animaciju za izvlacenje karti
 //dodaj audio na button clicks, audio za chips i na results
@@ -491,5 +526,3 @@ betButton.addEventListener("click", () => {
 
 //media queries napravi
 //mozda da napraviš da se hidden karta okrene
-//mozda hover effect na celu stranu
-//vrv redesign da uradis
