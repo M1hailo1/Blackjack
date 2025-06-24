@@ -110,6 +110,7 @@
   align-items: center;
   justify-content: center;
   position: relative;
+  transition: opacity 3000ms ease;
 }
 
 .logo-image-one {
@@ -166,6 +167,11 @@
 .score-dealer,
 .score-player {
   font-size: 2rem;
+}
+
+.score-value-dealer,
+.score-value-player {
+  transition: opacity 3000ms ease;
 }
 
 .bet-display {

@@ -40,6 +40,10 @@ let playerHand = [];
 let dealerHand = [];
 let deck = [];
 
+let opacityTimeout1 = null;
+let opacityTimeout2 = null;
+let opacityTimeout3 = null;
+
 const buttonClickAudio = new Audio("Audios/buttonClick.mp3");
 
 function buildDeckArray() {
@@ -256,12 +260,12 @@ function resultHandler() {
     turnCounter = 0;
     resetVariables();
     renderHands();
-    dealerCardsDisplay.style.opacity = "0.5";
+    opacitySetter();
   } else if (dealerValue > 21 && playerValue <= 21) {
     resultDisplay.textContent = "Dealer busted! You win!";
     balance = balance + bet * 2;
     balanceDisplay.textContent = balance;
-    dealerCardsDisplay.style.opacity = "0.5";
+    opacitySetter();
     if (playerValue === 21 && playerHand.length === 2) {
       resultDisplay.textContent += " Blackjack!";
     }
@@ -269,12 +273,12 @@ function resultHandler() {
   } else if (dealerValue > playerValue && stand) {
     resultDisplay.textContent = "Dealer wins!";
     resetVariables();
-    dealerCardsDisplay.style.opacity = "0.5";
+    opacitySetter();
   } else if (dealerValue < playerValue && stand) {
     resultDisplay.textContent = "You win!";
     balance = balance + bet * 2;
     balanceDisplay.textContent = balance;
-    dealerCardsDisplay.style.opacity = "0.5";
+    opacitySetter();
     if (playerValue === 21 && playerHand.length === 2) {
       resultDisplay.textContent += " Blackjack!";
     }
@@ -287,13 +291,13 @@ function resultHandler() {
     balance = balance + bet;
     balanceDisplay.textContent = balance;
     resetVariables();
-    dealerCardsDisplay.style.opacity = "0.5";
+    opacitySetter();
   } else if (dealerValue === playerValue && stand) {
     resultDisplay.textContent = "It's a tie!";
     balance = balance + bet;
     balanceDisplay.textContent = balance;
     resetVariables();
-    dealerCardsDisplay.style.opacity = "0.5";
+    opacitySetter();
   }
 }
 
@@ -312,6 +316,29 @@ function standFunction() {
 
   renderHands();
   resultHandler();
+}
+
+function opacitySetter() {
+  clearTimeout(opacityTimeout1);
+  clearTimeout(opacityTimeout2);
+  clearTimeout(opacityTimeout3);
+
+  opacityTimeout1 = setTimeout(() => {
+    dealerCardsDisplay.style.opacity = "0.5";
+    playerCardsDisplay.style.opacity = "0.5";
+
+    opacityTimeout2 = setTimeout(() => {
+      dealerValueDisplay.style.opacity = "0";
+      playerValueDisplay.style.opacity = "0";
+    }, 5000);
+
+    opacityTimeout3 = setTimeout(() => {
+      dealerValueDisplay.textContent = "Place your bets!";
+      playerValueDisplay.textContent = "Never give up!";
+      dealerValueDisplay.style.opacity = "1";
+      playerValueDisplay.style.opacity = "1";
+    }, 8000);
+  }, 100);
 }
 
 function playButtonSound() {
@@ -406,6 +433,10 @@ resetGameButton.addEventListener("click", () => {
   revealDealerCard = false;
   turnCounter = 0;
 
+  clearTimeout(opacityTimeout1);
+  clearTimeout(opacityTimeout2);
+  clearTimeout(opacityTimeout3);
+
   playerHand = [];
   dealerHand = [];
   deck = [];
@@ -462,11 +493,15 @@ betButton.addEventListener("click", () => {
           rotateChipValue += 15;
         }
       }
+      clearTimeout(opacityTimeout1);
+      clearTimeout(opacityTimeout2);
+      clearTimeout(opacityTimeout3);
       dealerHand = [];
       playerHand = [];
       playerValue = 0;
       dealerValue = 0;
       dealerCardsDisplay.style.opacity = "1";
+      playerCardsDisplay.style.opacity = "1";
       dealerCardsDisplay.innerHTML = "";
       playerCardsDisplay.innerHTML = "";
       dealerValueDisplay.textContent = "";
@@ -476,13 +511,13 @@ betButton.addEventListener("click", () => {
       balanceDisplay.textContent = balance;
       canHit = true;
       revealDealerCard = false;
+      roundStarted = true;
       resultDisplay.textContent = "Dealing cards...";
       setTimeout(() => {
         dealerHand = dealCard();
         playerHand = dealCard();
         loadValue();
         handleAces();
-        roundStarted = true;
         resultDisplay.textContent = "Game started! You can hit or stand.";
         renderHands();
         turnCounter++;
@@ -492,7 +527,7 @@ betButton.addEventListener("click", () => {
   }
 });
 
-// opacity da se spusti kad se zavrsi runda ili tako neki indikator
+// dodaj audio na button clicks, audio za chips i audio na results
 
 // dodaj count chipova na stacku
 
@@ -501,8 +536,6 @@ betButton.addEventListener("click", () => {
 // dodaj funckije da uklonis redudanstonst
 
 // napravi animaciju za izvlacenje karti
-
-// dodaj audio na button clicks, audio za chips i na results
 
 // dodaj animaciju za chips
 
