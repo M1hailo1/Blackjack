@@ -80,21 +80,11 @@ function startGame() {
   if (gameStarted === false) {
     playButtonSound();
     gameStarted = true;
-    roundStarted = true;
     resultDisplay.textContent = "";
     balanceDisplay.textContent = balance;
-    revealDealerCard = false;
     buildDeckArray();
     shuffleDeck();
-    dealerHand = dealCard();
-    playerHand = dealCard();
-    loadValue();
-    handleAces();
-    renderHands();
-    turnCounter++;
-    canHit = true;
-    resultDisplay.textContent = "Game started! You can hit or stand.";
-    resultHandler();
+    resultDisplay.textContent = "Game started! Place your bet and hit BET";
   }
 }
 
@@ -266,10 +256,12 @@ function resultHandler() {
     turnCounter = 0;
     resetVariables();
     renderHands();
+    dealerCardsDisplay.style.opacity = "0.5";
   } else if (dealerValue > 21 && playerValue <= 21) {
     resultDisplay.textContent = "Dealer busted! You win!";
     balance = balance + bet * 2;
     balanceDisplay.textContent = balance;
+    dealerCardsDisplay.style.opacity = "0.5";
     if (playerValue === 21 && playerHand.length === 2) {
       resultDisplay.textContent += " Blackjack!";
     }
@@ -277,10 +269,12 @@ function resultHandler() {
   } else if (dealerValue > playerValue && stand) {
     resultDisplay.textContent = "Dealer wins!";
     resetVariables();
+    dealerCardsDisplay.style.opacity = "0.5";
   } else if (dealerValue < playerValue && stand) {
     resultDisplay.textContent = "You win!";
     balance = balance + bet * 2;
     balanceDisplay.textContent = balance;
+    dealerCardsDisplay.style.opacity = "0.5";
     if (playerValue === 21 && playerHand.length === 2) {
       resultDisplay.textContent += " Blackjack!";
     }
@@ -293,11 +287,13 @@ function resultHandler() {
     balance = balance + bet;
     balanceDisplay.textContent = balance;
     resetVariables();
+    dealerCardsDisplay.style.opacity = "0.5";
   } else if (dealerValue === playerValue && stand) {
     resultDisplay.textContent = "It's a tie!";
     balance = balance + bet;
     balanceDisplay.textContent = balance;
     resetVariables();
+    dealerCardsDisplay.style.opacity = "0.5";
   }
 }
 
@@ -325,7 +321,7 @@ function playButtonSound() {
 }
 
 function chipButtonFunction(value, rotateValue, leftPosition) {
-  if (!roundStarted) {
+  if (!roundStarted && gameStarted) {
     playButtonSound();
     if (balance >= value) {
       balance -= value;
@@ -422,8 +418,28 @@ resetGameButton.addEventListener("click", () => {
 
   betDisplay.innerHTML = "";
 
-  dealerCardsDisplay.innerHTML = "";
-  playerCardsDisplay.innerHTML = "";
+  dealerCardsDisplay.innerHTML = `
+                <img
+                  class='logo-image-one'
+                  src='Images/svg_playing_cards/fronts/spades_jack.svg'
+                  alt='logo'
+                />
+                <img
+                  class='logo-image-two'
+                  src='Images/svg_playing_cards/fronts/hearts_ace.svg'
+                  alt='logo'
+                />
+                <h1 class='logo-title'>BLACKJACK</h1>`;
+  playerCardsDisplay.innerHTML = `                <h2 class="how-to">
+                  <span>How to Play:</span><br />Press Start Game<br />Choose
+                  bet amount<br />Click bet<br />
+                  <a
+                    class="rules-link"
+                    target="_blank"
+                    href="https://www.blackjackapprenticeship.com/how-to-play-blackjack/"
+                    >RULES</a
+                  >
+                </h2>`;
   dealerValueDisplay.textContent = "";
   playerValueDisplay.textContent = "";
   resultDisplay.textContent = "Game reset! Click Start Game to play again.";
@@ -438,18 +454,19 @@ betButton.addEventListener("click", () => {
       playButtonSound();
       if (bet === 0) {
         if (balance === 0) {
-          resultDisplay.textContent = "Game Over! Press Reset to start over.";
-          alert("You have no balance left! Please reset the game.");
+          resultDisplay.textContent =
+            "No balance left. Game Over! Press Reset to start over.";
           return;
         } else {
-          alert("Please place a bet before starting the game!");
-          return;
+          chipButtonFunction(100, rotateChipValue, "7%");
+          rotateChipValue += 15;
         }
       }
       dealerHand = [];
       playerHand = [];
       playerValue = 0;
       dealerValue = 0;
+      dealerCardsDisplay.style.opacity = "1";
       dealerCardsDisplay.innerHTML = "";
       playerCardsDisplay.innerHTML = "";
       dealerValueDisplay.textContent = "";
@@ -475,7 +492,9 @@ betButton.addEventListener("click", () => {
   }
 });
 
-// start game samo da skloni welcome i reset game da vrati start screen
+// opacity da se spusti kad se zavrsi runda ili tako neki indikator
+
+// dodaj count chipova na stacku
 
 // stavi before ili after element na ono umesto bordera
 
