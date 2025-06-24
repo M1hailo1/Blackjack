@@ -45,6 +45,9 @@ let opacityTimeout2 = null;
 let opacityTimeout3 = null;
 
 const buttonClickAudio = new Audio("Audios/buttonClick.mp3");
+const chipClickAudio = new Audio("Audios/chipClick.mp3");
+const winAudio = new Audio("Audios/win.mp3");
+const loseAudio = new Audio("Audios/lose.mp3");
 
 function buildDeckArray() {
   deck = [];
@@ -193,7 +196,7 @@ function loadValue() {
 }
 
 function dealCard() {
-  if (deck.length === 0) {
+  if (deck.length < 4) {
     buildDeckArray();
     shuffleDeck();
   }
@@ -260,12 +263,14 @@ function resultHandler() {
     turnCounter = 0;
     resetVariables();
     renderHands();
+    playLoseSound();
     opacitySetter();
   } else if (dealerValue > 21 && playerValue <= 21) {
     resultDisplay.textContent = "Dealer busted! You win!";
     balance = balance + bet * 2;
     balanceDisplay.textContent = balance;
     opacitySetter();
+    playWinSound();
     if (playerValue === 21 && playerHand.length === 2) {
       resultDisplay.textContent += " Blackjack!";
     }
@@ -273,12 +278,14 @@ function resultHandler() {
   } else if (dealerValue > playerValue && stand) {
     resultDisplay.textContent = "Dealer wins!";
     resetVariables();
+    playLoseSound();
     opacitySetter();
   } else if (dealerValue < playerValue && stand) {
     resultDisplay.textContent = "You win!";
     balance = balance + bet * 2;
     balanceDisplay.textContent = balance;
     opacitySetter();
+    playWinSound();
     if (playerValue === 21 && playerHand.length === 2) {
       resultDisplay.textContent += " Blackjack!";
     }
@@ -347,9 +354,27 @@ function playButtonSound() {
   buttonClickAudio.play();
 }
 
+function playChipSound() {
+  chipClickAudio.volume = 0.4;
+  chipClickAudio.currentTime = 1.1;
+  chipClickAudio.play();
+}
+
+function playWinSound() {
+  winAudio.volume = 0.4;
+  winAudio.currentTime = 0;
+  winAudio.play();
+}
+
+function playLoseSound() {
+  loseAudio.volume = 0.4;
+  loseAudio.currentTime = 0;
+  loseAudio.play();
+}
+
 function chipButtonFunction(value, rotateValue, leftPosition) {
   if (!roundStarted && gameStarted) {
-    playButtonSound();
+    playChipSound();
     if (balance >= value) {
       balance -= value;
       bet += value;
@@ -366,7 +391,7 @@ function chipButtonFunction(value, rotateValue, leftPosition) {
 
       betChip.addEventListener("click", () => {
         if (!roundStarted) {
-          playButtonSound();
+          playChipSound();
           betChip.remove();
           balance += value;
           bet -= value;
@@ -449,6 +474,9 @@ resetGameButton.addEventListener("click", () => {
 
   betDisplay.innerHTML = "";
 
+  dealerCardsDisplay.style.opacity = "1";
+  playerCardsDisplay.style.opacity = "1";
+
   dealerCardsDisplay.innerHTML = `
                 <img
                   class='logo-image-one'
@@ -504,6 +532,8 @@ betButton.addEventListener("click", () => {
       playerCardsDisplay.style.opacity = "1";
       dealerCardsDisplay.innerHTML = "";
       playerCardsDisplay.innerHTML = "";
+      dealerValueDisplay.style.opacity = "1";
+      playerValueDisplay.style.opacity = "1";
       dealerValueDisplay.textContent = "";
       playerValueDisplay.textContent = "";
       resultDisplay.textContent = "";
@@ -527,15 +557,13 @@ betButton.addEventListener("click", () => {
   }
 });
 
-// dodaj audio na button clicks, audio za chips i audio na results
+// stavi before ili after element na ono umesto bordera !!
+
+// napravi animaciju za izvlacenje karti !
 
 // dodaj count chipova na stacku
 
-// stavi before ili after element na ono umesto bordera
-
 // dodaj funckije da uklonis redudanstonst
-
-// napravi animaciju za izvlacenje karti
 
 // dodaj animaciju za chips
 
