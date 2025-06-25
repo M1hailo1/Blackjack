@@ -220,6 +220,7 @@
   background-color: var(--accent-1);
   box-shadow: -5px -5px 10px black;
   transition: all 150ms;
+  text-align: center;
 }
 
 .chip:hover {
@@ -322,4 +323,123 @@ img {
 .reset-button:active,
 .bet-button:active {
   scale: 1.08;
+}
+
+@keyframes swoop-in-dealer {
+  0% {
+    opacity: 0;
+    transform: translateX(600px) translateY(-60px) scale(0.8) rotate(-10deg);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(300px) translateY(-30px) scale(1.05) rotate(2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0px) translateY(0) scale(1) rotate(0deg);
+  }
+}
+
+.card-animate-dealer {
+  animation: swoop-in-dealer 800ms linear;
+}
+
+@keyframes swoop-in-player {
+  0% {
+    opacity: 0;
+    transform: translateX(600px) translateY(-380px) scale(0.8) rotate(-10deg);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(300px) translateY(-90px) scale(1.05) rotate(2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0px) translateY(0) scale(1) rotate(0deg);
+  }
+}
+
+.card-animate-player {
+  animation: swoop-in-player 800ms linear;
+}
+
+@keyframes flip {
+  0% {
+    opacity: 1;
+    transform: translateX(-100px) perspective(600px) rotateY(90deg);
+  }
+  40% {
+    opacity: 0.7;
+    transform: translateX(-200px) perspective(600px) rotateY(90deg);
+  }
+  70% {
+    opacity: 0.7;
+    transform: translateX(-100px) perspective(600px) rotateY(90deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0px) perspective(600px) rotateY(0deg);
+  }
+}
+
+.covered-card-animate {
+  animation: flip 800ms linear;
+  backface-visibility: hidden;
+}
+
+@keyframes move-up {
+  0% {
+    transform: translateY(180px);
+  }
+  40% {
+    transform: translateY(120px);
+  }
+  70% {
+    transform: translateY(70px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.chip-animation {
+  animation: move-up 800ms linear;
+}
+
+@keyframes move-down {
+  0% {
+    transform: translateY(0px);
+  }
+  40% {
+    transform: translateY(70px);
+  }
+  70% {
+    transform: translateY(120px);
+  }
+  100% {
+    transform: translateY(180px);
+  }
+}
+
+.chip-animation-down {
+  animation: move-down 300ms linear;
+}
+
+@keyframes gone {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(0.7);
+  }
+  70% {
+    transform: scale(0.4);
+  }
+  100% {
+    transform: scale(0);
+  }
+}
+
+.chip-animation-gone {
+  animation: gone 300ms linear;
 }

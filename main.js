@@ -29,9 +29,14 @@ let revealDealerCard = false;
 let bet = 0;
 let balance = 5000;
 let turnCounter = 0;
+
 let rotateChipValue = 0;
 let rotateChipValue200 = 0;
 let rotateChipValue500 = 0;
+
+let chipCount100 = 0;
+let chipCount200 = 0;
+let chipCount500 = 0;
 
 let playerValue;
 let dealerValue;
@@ -43,6 +48,11 @@ let deck = [];
 let opacityTimeout1 = null;
 let opacityTimeout2 = null;
 let opacityTimeout3 = null;
+
+let prevDealerHand = 0;
+let prevPlayerHand = 0;
+
+let click;
 
 const buttonClickAudio = new Audio("Audios/buttonClick.mp3");
 const chipClickAudio = new Audio("Audios/chipClick.mp3");
@@ -113,6 +123,7 @@ function renderHands() {
       pixelOffsetY += 10;
       pixelRotation = -2;
     }
+
     cardDealerElement.style.left = `${pixelOffset}px`;
     cardDealerElement.style.top = `${pixelOffsetY}px`;
     cardDealerElement.style.transform = `rotate(${pixelRotation}deg)`;
@@ -124,6 +135,16 @@ function renderHands() {
     }
 
     dealerCardsDisplay.appendChild(cardDealerElement);
+
+    if (index === 0 && revealDealerCard) {
+      cardDealerElement.classList.add("covered-card-animate");
+    }
+
+    if (prevDealerHand === 0) {
+      cardDealerElement.classList.add("card-animate-dealer");
+    } else if (index > 1) {
+      cardDealerElement.classList.add("card-animate-dealer");
+    }
   });
 
   pixelOffset = 25;
@@ -145,7 +166,17 @@ function renderHands() {
     cardPlayerElement.style.left = `${pixelOffset}px`;
     cardPlayerElement.style.top = `${pixelOffsetY}px`;
     cardPlayerElement.style.transform = `rotate(${pixelRotation}deg)`;
+
     playerCardsDisplay.appendChild(cardPlayerElement);
+
+    if (prevPlayerHand === 0) {
+      cardPlayerElement.classList.add("card-animate-player");
+    } else if (
+      index === playerHand.length - 1 &&
+      playerHand.length > prevPlayerHand
+    ) {
+      cardPlayerElement.classList.add("card-animate-player");
+    }
   });
 
   if (revealDealerCard) {
@@ -166,6 +197,9 @@ function renderHands() {
   }
 
   playerValueDisplay.textContent = playerValue;
+
+  prevDealerHand = dealerHand.length;
+  prevPlayerHand = playerHand.length;
 }
 
 function loadValue() {
@@ -208,6 +242,7 @@ function dealCard() {
 }
 
 function hitFunction() {
+  if (click > 0) return;
   resultDisplay.textContent = "You can hit or stand.";
   if (canHit) {
     turnCounter++;
@@ -215,8 +250,12 @@ function hitFunction() {
     loadValue();
     renderHands();
     handleAces();
+    click++;
   }
-  resultHandler();
+  setTimeout(() => {
+    resultHandler();
+    click = 0;
+  }, 800);
 }
 
 function handleAces() {
@@ -235,7 +274,8 @@ function handleAces() {
       }
     });
   }
-  renderHands();
+  //renderHands();
+  playerValueDisplay.textContent = playerValue;
 }
 
 function resetVariables() {
@@ -247,7 +287,12 @@ function resetVariables() {
   turnCounter = 0;
   bet = 0;
   betAmountDisplay.textContent = bet;
-  betDisplay.innerHTML = "";
+  Array.from(betDisplay.children).forEach((child) => {
+    child.classList.add("chip-animation-gone");
+  });
+  setTimeout(() => {
+    betDisplay.innerHTML = "";
+  }, 280);
 }
 
 function resultHandler() {
@@ -309,6 +354,8 @@ function resultHandler() {
 }
 
 function standFunction() {
+  if (click > 0) return;
+  click++;
   canHit = false;
   stand = true;
   revealDealerCard = true;
@@ -321,8 +368,11 @@ function standFunction() {
     renderHands();
   }
 
+  setTimeout(() => {
+    resultHandler();
+    click = 0;
+  }, 700);
   renderHands();
-  resultHandler();
 }
 
 function opacitySetter() {
@@ -331,21 +381,21 @@ function opacitySetter() {
   clearTimeout(opacityTimeout3);
 
   opacityTimeout1 = setTimeout(() => {
-    dealerCardsDisplay.style.opacity = "0.5";
-    playerCardsDisplay.style.opacity = "0.5";
+    dealerCardsDisplay.style.opacity = "0.6";
+    playerCardsDisplay.style.opacity = "0.6";
+  }, 2000);
 
-    opacityTimeout2 = setTimeout(() => {
-      dealerValueDisplay.style.opacity = "0";
-      playerValueDisplay.style.opacity = "0";
-    }, 5000);
+  opacityTimeout2 = setTimeout(() => {
+    dealerValueDisplay.style.opacity = "0";
+    playerValueDisplay.style.opacity = "0";
+  }, 5000);
 
-    opacityTimeout3 = setTimeout(() => {
-      dealerValueDisplay.textContent = "Place your bets!";
-      playerValueDisplay.textContent = "Never give up!";
-      dealerValueDisplay.style.opacity = "1";
-      playerValueDisplay.style.opacity = "1";
-    }, 8000);
-  }, 100);
+  opacityTimeout3 = setTimeout(() => {
+    dealerValueDisplay.textContent = "Place your bets!";
+    playerValueDisplay.textContent = "Never give up!";
+    dealerValueDisplay.style.opacity = "1";
+    playerValueDisplay.style.opacity = "1";
+  }, 8000);
 }
 
 function playButtonSound() {
@@ -361,7 +411,7 @@ function playChipSound() {
 }
 
 function playWinSound() {
-  winAudio.volume = 0.4;
+  winAudio.volume = 0.25;
   winAudio.currentTime = 0;
   winAudio.play();
 }
@@ -372,7 +422,7 @@ function playLoseSound() {
   loseAudio.play();
 }
 
-function chipButtonFunction(value, rotateValue, leftPosition) {
+function chipButtonFunction(value, rotateValue, leftPosition, chipCount) {
   if (!roundStarted && gameStarted) {
     playChipSound();
     if (balance >= value) {
@@ -386,18 +436,24 @@ function chipButtonFunction(value, rotateValue, leftPosition) {
       betChip.style.position = "absolute";
       betChip.style.left = `${leftPosition}`;
       betChip.style.transform = `rotate(${rotateValue}deg)`;
-      betChip.textContent = `${value}`;
+      betChip.textContent = `${value} ${chipCount}x`;
       betDisplay.appendChild(betChip);
+
+      betChip.classList.add("chip-animation");
 
       betChip.addEventListener("click", () => {
         if (!roundStarted) {
           playChipSound();
-          betChip.remove();
-          balance += value;
-          bet -= value;
-          betAmountDisplay.textContent = bet;
-          balanceDisplay.textContent = balance;
-          rotateValue -= 15;
+          betChip.classList.add("chip-animation-down");
+          setTimeout(() => {
+            balance += value;
+            bet -= value;
+            chipCount--;
+            betAmountDisplay.textContent = bet;
+            balanceDisplay.textContent = balance;
+            rotateValue -= 15;
+            betChip.remove();
+          }, 280);
         }
       });
     } else {
@@ -409,24 +465,30 @@ function chipButtonFunction(value, rotateValue, leftPosition) {
 chipHundred.addEventListener("click", () => {
   if (!betDisplay.querySelector(".chip[data-value='100']")) {
     rotateChipValue = 0;
+    chipCount100 = 0;
   }
-  chipButtonFunction(100, rotateChipValue, "7%");
+  chipCount100++;
+  chipButtonFunction(100, rotateChipValue, "7%", chipCount100);
   rotateChipValue += 15;
 });
 
 chipTwoHundred.addEventListener("click", () => {
   if (!betDisplay.querySelector(".chip[data-value='200']")) {
     rotateChipValue200 = 0;
+    chipCount200 = 0;
   }
-  chipButtonFunction(200, rotateChipValue200, "38%");
+  chipCount200++;
+  chipButtonFunction(200, rotateChipValue200, "38%", chipCount200);
   rotateChipValue200 += 15;
 });
 
 chipFiveHundred.addEventListener("click", () => {
   if (!betDisplay.querySelector(".chip[data-value='500']")) {
     rotateChipValue500 = 0;
+    chipCount500 = 0;
   }
-  chipButtonFunction(500, rotateChipValue500, "69%");
+  chipCount500++;
+  chipButtonFunction(500, rotateChipValue500, "69%", chipCount500);
   rotateChipValue500 += 15;
 });
 
@@ -517,8 +579,8 @@ betButton.addEventListener("click", () => {
             "No balance left. Game Over! Press Reset to start over.";
           return;
         } else {
-          chipButtonFunction(100, rotateChipValue, "7%");
-          rotateChipValue += 15;
+          chipButtonFunction(100, rotateChipValue, "7%", 1);
+          rotateChipValue = 0;
         }
       }
       clearTimeout(opacityTimeout1);
@@ -557,16 +619,6 @@ betButton.addEventListener("click", () => {
   }
 });
 
-// stavi before ili after element na ono umesto bordera !!
-
-// napravi animaciju za izvlacenje karti !
-
-// dodaj count chipova na stacku
-
 // dodaj funckije da uklonis redudanstonst
 
-// dodaj animaciju za chips
-
 // media queries napravi
-
-// mozda da napraviš da se hidden karta okrene
