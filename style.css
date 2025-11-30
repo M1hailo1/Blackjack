@@ -443,3 +443,485 @@ img {
 .chip-animation-gone {
   animation: gone 300ms linear;
 }
+
+/* Media Queries */
+
+@media (max-width: 1200px) {
+  :root {
+    --card-height: 220px;
+  }
+
+  .troll-text,
+  .balance {
+    font-size: 1.4rem;
+    line-height: 35px;
+  }
+
+  .logo-title {
+    font-size: 3rem;
+    margin-top: 120px;
+  }
+
+  .how-to {
+    font-size: 1.6rem;
+    line-height: 40px;
+  }
+
+  .how-to span {
+    font-size: 2rem;
+  }
+
+  .rules-link {
+    font-size: 1.2rem;
+    padding: 8px;
+  }
+
+  .score-dealer,
+  .score-player {
+    font-size: 1.6rem;
+  }
+
+  .bet-amount-display {
+    font-size: 1.2rem;
+    line-height: 35px;
+  }
+
+  .chip {
+    width: 50px;
+    height: 50px;
+    font-size: 0.9rem;
+  }
+
+  .result-display {
+    width: 30%;
+    font-size: 0.9rem;
+    line-height: 35px;
+  }
+
+  .start-game-button,
+  .hit-button,
+  .stand-button,
+  .reset-button,
+  .bet-button {
+    height: 45px;
+    font-size: 1.4rem;
+  }
+}
+
+@media (max-width: 992px) {
+  :root {
+    --card-height: 180px;
+  }
+
+  .outer-game {
+    flex-direction: column;
+    height: 95%;
+  }
+
+  .left-side {
+    width: 100%;
+    height: 15%;
+    flex-direction: row;
+    justify-content: space-around;
+  }
+
+  .troll-text {
+    display: none;
+  }
+
+  .balance {
+    font-size: 1.2rem;
+    line-height: 25px;
+  }
+
+  .inner-game {
+    width: 100%;
+    height: 70%;
+  }
+
+  .right-side {
+    width: 100%;
+    height: 15%;
+    display: flex;
+    flex-direction: row;
+  }
+
+  .deck-image-div {
+    width: 30%;
+    height: 100%;
+  }
+
+  .play-buttons {
+    width: 70%;
+    height: 100%;
+    flex-direction: row;
+  }
+
+  .start-game-button,
+  .reset-button {
+    width: 120px;
+    height: 40px;
+    font-size: 1rem;
+  }
+
+  .hit-button,
+  .stand-button,
+  .bet-button {
+    width: 30%;
+    height: 60%;
+    font-size: 1.2rem;
+  }
+
+  .logo-title {
+    font-size: 2.5rem;
+    margin-top: 100px;
+  }
+
+  .how-to {
+    font-size: 1.3rem;
+    line-height: 30px;
+  }
+
+  .how-to span {
+    font-size: 1.6rem;
+  }
+
+  .rules-link {
+    font-size: 1rem;
+    padding: 6px;
+  }
+
+  .bet-amount-display {
+    font-size: 1rem;
+    line-height: 30px;
+  }
+
+  .result-display {
+    width: 35%;
+    font-size: 0.8rem;
+    line-height: 30px;
+  }
+
+  .deck-image,
+  .deck-image-second,
+  .deck-image-third {
+    height: calc(var(--card-height) * 0.8);
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --card-height: 140px;
+  }
+
+  .balance {
+    font-size: 1rem;
+    line-height: 20px;
+  }
+
+  .bet-amount-display {
+    font-size: 0.8rem;
+    line-height: 25px;
+  }
+
+  .start-game-button,
+  .reset-button {
+    width: 100px;
+    height: 35px;
+    font-size: 0.7rem;
+  }
+
+  .h-dealer,
+  .h-player {
+    font-size: 0.9rem;
+  }
+
+  .logo-title {
+    font-size: 1.8rem;
+    margin-top: 70px;
+  }
+
+  .how-to {
+    font-size: 1rem;
+    line-height: 25px;
+  }
+
+  .how-to span {
+    font-size: 1.2rem;
+  }
+
+  .rules-link {
+    font-size: 0.7rem;
+    padding: 5px;
+    border: solid 3px var(--text-color);
+  }
+
+  .score-dealer,
+  .score-player {
+    font-size: 1.2rem;
+  }
+
+  .chip {
+    width: 40px;
+    height: 40px;
+    font-size: 0.7rem;
+    border: double 3px var(--text-color);
+  }
+
+  .chip:hover {
+    border: double 3px var(--accent-1);
+  }
+
+  .result-display {
+    width: 40%;
+    left: 20px;
+    font-size: 0.7rem;
+    line-height: 25px;
+  }
+
+  .bet-display {
+    width: 35%;
+    height: 18%;
+  }
+
+  .chips-player {
+    width: 35%;
+    height: 18%;
+  }
+
+  .hit-button,
+  .stand-button,
+  .bet-button {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 576px) {
+  :root {
+    --card-height: 110px;
+  }
+
+  .outer-game {
+    width: 98%;
+    height: 95%;
+  }
+
+  .left-side {
+    padding: 10px 5px;
+  }
+
+  .balance {
+    font-size: 0.7rem;
+    line-height: 18px;
+  }
+
+  .bet-amount-display {
+    font-size: 0.6rem;
+    line-height: 20px;
+  }
+
+  .start-game-button,
+  .reset-button {
+    width: 80px;
+    height: 30px;
+    font-size: 0.5rem;
+  }
+
+  .h-dealer {
+    top: 35%;
+    left: 10px;
+    font-size: 0.7rem;
+  }
+
+  .h-player {
+    top: 65%;
+    left: 10px;
+    font-size: 0.7rem;
+  }
+
+  .logo-title {
+    font-size: 1.2rem;
+    margin-top: 50px;
+    text-shadow: -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000,
+      3px 3px 0 #000, 0px 3px 0 #000, 3px 0px 0 #000, 0px -3px 0 #000,
+      -3px 0px 0 #000;
+  }
+
+  .how-to {
+    font-size: 0.7rem;
+    line-height: 18px;
+  }
+
+  .how-to span {
+    font-size: 0.9rem;
+  }
+
+  .rules-link {
+    font-size: 0.5rem;
+    padding: 4px;
+    border: solid 2px var(--text-color);
+  }
+
+  .rules-link:hover {
+    border: solid 2px var(--accent-1);
+  }
+
+  .score-dealer,
+  .score-player {
+    font-size: 0.9rem;
+  }
+
+  .chip {
+    width: 32px;
+    height: 32px;
+    font-size: 0.5rem;
+    border: double 2px var(--text-color);
+  }
+
+  .chip:hover {
+    border: double 2px var(--accent-1);
+  }
+
+  .result-display {
+    width: 45%;
+    left: 10px;
+    font-size: 0.55rem;
+    line-height: 18px;
+  }
+
+  .bet-display {
+    width: 40%;
+    height: 16%;
+    left: 10px;
+  }
+
+  .chips-player {
+    width: 40%;
+    height: 16%;
+    left: 10px;
+    bottom: 10px;
+  }
+
+  .hit-button,
+  .stand-button,
+  .bet-button {
+    font-size: 0.8rem;
+    height: 50%;
+  }
+
+  .deck-image,
+  .deck-image-second,
+  .deck-image-third {
+    height: calc(var(--card-height) * 0.8);
+  }
+}
+
+@media (max-width: 400px) {
+  :root {
+    --card-height: 90px;
+  }
+
+  .balance,
+  .bet-amount-display {
+    font-size: 0.5rem;
+    line-height: 15px;
+  }
+
+  .start-game-button,
+  .reset-button {
+    width: 70px;
+    height: 25px;
+    font-size: 0.4rem;
+  }
+
+  .h-dealer,
+  .h-player {
+    font-size: 0.6rem;
+  }
+
+  .logo-title {
+    font-size: 1rem;
+    margin-top: 40px;
+  }
+
+  .how-to {
+    font-size: 0.55rem;
+    line-height: 15px;
+  }
+
+  .how-to span {
+    font-size: 0.7rem;
+  }
+
+  .rules-link {
+    font-size: 0.4rem;
+    padding: 3px;
+  }
+
+  .score-dealer,
+  .score-player {
+    font-size: 0.7rem;
+  }
+
+  .chip {
+    width: 28px;
+    height: 28px;
+    font-size: 0.4rem;
+  }
+
+  .result-display {
+    width: 50%;
+    font-size: 0.45rem;
+    line-height: 15px;
+  }
+
+  .hit-button,
+  .stand-button,
+  .bet-button {
+    font-size: 0.6rem;
+  }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  :root {
+    --card-height: 100px;
+  }
+
+  .outer-game {
+    height: 98%;
+  }
+
+  .left-side {
+    height: 12%;
+  }
+
+  .inner-game {
+    height: 76%;
+  }
+
+  .right-side {
+    height: 12%;
+  }
+
+  .balance,
+  .bet-amount-display,
+  .start-game-button,
+  .reset-button {
+    font-size: 0.6rem;
+  }
+
+  .logo-title {
+    font-size: 1.5rem;
+    margin-top: 50px;
+  }
+
+  .how-to {
+    font-size: 0.8rem;
+    line-height: 20px;
+  }
+
+  .result-display {
+    font-size: 0.65rem;
+    line-height: 20px;
+  }
+}

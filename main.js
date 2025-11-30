@@ -620,5 +620,3 @@ betButton.addEventListener("click", () => {
 });
 
 // dodaj funckije da uklonis redudanstonst
-
-// media queries napravi
