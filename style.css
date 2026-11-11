@@ -325,603 +325,157 @@ img {
   scale: 1.08;
 }
 
-@keyframes swoop-in-dealer {
-  0% {
-    opacity: 0;
-    transform: translateX(600px) translateY(-60px) scale(0.8) rotate(-10deg);
-  }
-  50% {
-    opacity: 1;
-    transform: translateX(300px) translateY(-30px) scale(1.05) rotate(2deg);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0px) translateY(0) scale(1) rotate(0deg);
-  }
+/* Keep motion local to the hand so cards never cross the controls. */
+@keyframes deal-card {
+  from { opacity: 0; translate: 24px -12px; scale: 0.92; }
+  to { opacity: 1; translate: 0 0; scale: 1; }
 }
 
-.card-animate-dealer {
-  animation: swoop-in-dealer 800ms linear;
-}
-
-@keyframes swoop-in-player {
-  0% {
-    opacity: 0;
-    transform: translateX(600px) translateY(-380px) scale(0.8) rotate(-10deg);
-  }
-  50% {
-    opacity: 1;
-    transform: translateX(300px) translateY(-90px) scale(1.05) rotate(2deg);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0px) translateY(0) scale(1) rotate(0deg);
-  }
-}
-
-.card-animate-player {
-  animation: swoop-in-player 800ms linear;
-}
+.card-animate-dealer,
+.card-animate-player { animation: deal-card 800ms ease-out; }
 
 @keyframes flip {
-  0% {
-    opacity: 1;
-    transform: translateX(-100px) perspective(600px) rotateY(90deg);
-  }
-  40% {
-    opacity: 0.7;
-    transform: translateX(-200px) perspective(600px) rotateY(90deg);
-  }
-  70% {
-    opacity: 0.7;
-    transform: translateX(-100px) perspective(600px) rotateY(90deg);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0px) perspective(600px) rotateY(0deg);
-  }
+  from { opacity: 0.5; scale: 0.05 1; }
+  to { opacity: 1; scale: 1 1; }
 }
-
-.covered-card-animate {
-  animation: flip 800ms linear;
-  backface-visibility: hidden;
-}
+.covered-card-animate { animation: flip 600ms ease-out; }
 
 @keyframes move-up {
-  0% {
-    transform: translateY(180px);
-  }
-  40% {
-    transform: translateY(120px);
-  }
-  70% {
-    transform: translateY(70px);
-  }
-  100% {
-    transform: translateY(0px);
-  }
+  from { opacity: 0; translate: 0 24px; }
+  to { opacity: 1; translate: 0 0; }
 }
-
-.chip-animation {
-  animation: move-up 800ms linear;
-}
+.chip-animation { animation: move-up 300ms ease-out; }
 
 @keyframes move-down {
-  0% {
-    transform: translateY(0px);
-  }
-  40% {
-    transform: translateY(70px);
-  }
-  70% {
-    transform: translateY(120px);
-  }
-  100% {
-    transform: translateY(180px);
-  }
+  to { opacity: 0; translate: 0 24px; }
 }
+.chip-animation-down { animation: move-down 280ms ease-in forwards; }
 
-.chip-animation-down {
-  animation: move-down 300ms linear;
+@keyframes gone { to { opacity: 0; scale: 0.4; } }
+.chip-animation-gone { animation: gone 280ms ease-in forwards; }
+
+.logo-title { font-size: clamp(24px, 3vw, 44px); }
+.how-to { font-size: clamp(14px, 1.7vw, 24px); line-height: 1.8; }
+.how-to span { font-size: clamp(18px, 2vw, 28px); }
+.rules-link { display: inline-block; font-size: 14px; margin-top: 8px; }
+
+.table {
+  width: 100%;
+  min-height: 100svh;
+  height: auto;
+  padding: 24px;
 }
-
-@keyframes gone {
-  0% {
-    transform: scale(1);
-  }
-  40% {
-    transform: scale(0.7);
-  }
-  70% {
-    transform: scale(0.4);
-  }
-  100% {
-    transform: scale(0);
-  }
+.outer-game { min-height: 820px; height: calc(100svh - 48px); width: 100%; }
+.inner-game { overflow: hidden; isolation: isolate; }
+.start-game-button, .reset-button {
+  font-size: clamp(10px, 1.2vw, 18px);
+  min-height: 48px;
+  padding: 8px;
 }
-
-.chip-animation-gone {
-  animation: gone 300ms linear;
+.result-display { left: 12px; width: 32%; line-height: 1.8; }
+.result-text { font-size: clamp(10px, 1.2vw, 17px); overflow-wrap: anywhere; }
+.troll-text { font-size: clamp(12px, 1.6vw, 24px); line-height: 1.8; }
+.balance, .bet-amount-display { font-size: clamp(11px, 1.3vw, 20px); line-height: 1.9; }
+.cards-dealer, .cards-player {
+  --playing-card-width: calc(var(--card-height) * 0.69);
+  --card-step: min(42px, (100% - var(--playing-card-width) - 8px) / max(1, var(--hand-size) - 1));
 }
+.playing-card {
+  position: absolute;
+  top: 8px;
+  /* Half the hand width is subtracted from its container's center. */
+  left: calc((100% - var(--playing-card-width) - (var(--hand-size) - 1) * var(--card-step)) / 2 + var(--card-index) * var(--card-step));
+  transition: left 300ms ease;
+  width: var(--playing-card-width);
+  height: var(--card-height);
+  transform: rotate(var(--card-rotation));
+  border-radius: 8px;
+}
+button, .chip { touch-action: manipulation; }
+button:focus-visible, .chip:focus-visible, a:focus-visible { outline: 3px solid yellow; outline-offset: 4px; }
 
-/* Media Queries */
-
-@media (max-width: 1200px) {
-  :root {
-    --card-height: 220px;
-  }
-
-  .troll-text,
-  .balance {
-    font-size: 1.4rem;
-    line-height: 35px;
-  }
-
-  .logo-title {
-    font-size: 3rem;
-    margin-top: 120px;
-  }
-
-  .how-to {
-    font-size: 1.6rem;
-    line-height: 40px;
-  }
-
-  .how-to span {
-    font-size: 2rem;
-  }
-
-  .rules-link {
-    font-size: 1.2rem;
-    padding: 8px;
-  }
-
-  .score-dealer,
-  .score-player {
-    font-size: 1.6rem;
-  }
-
-  .bet-amount-display {
-    font-size: 1.2rem;
-    line-height: 35px;
-  }
-
-  .chip {
-    width: 50px;
-    height: 50px;
-    font-size: 0.9rem;
-  }
-
-  .result-display {
-    width: 30%;
-    font-size: 0.9rem;
-    line-height: 35px;
-  }
-
-  .start-game-button,
-  .hit-button,
-  .stand-button,
-  .reset-button,
-  .bet-button {
-    height: 45px;
-    font-size: 1.4rem;
-  }
+@media (max-width: 1200px) and (min-width: 993px) {
+  :root { --card-height: 220px; }
+  .logo-title { font-size: 2.5rem; }
+  .how-to { font-size: 18px; line-height: 2.2; }
+  .how-to span { font-size: 22px; }
+  .chip { width: 48px; height: 48px; font-size: 11px; }
 }
 
 @media (max-width: 992px) {
-  :root {
-    --card-height: 180px;
-  }
-
+  :root { --card-height: 140px; }
+  .table { padding: 12px; }
   .outer-game {
-    flex-direction: column;
-    height: 95%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    justify-content: stretch;
+    justify-items: stretch;
+    grid-template-rows: 126px minmax(560px, 1fr) 52px;
+    min-height: 0;
+    height: max(786px, calc(100svh - 24px));
+    gap: 12px;
+    padding: 12px;
   }
-
   .left-side {
-    width: 100%;
-    height: 15%;
-    flex-direction: row;
-    justify-content: space-around;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%; height: auto; gap: 12px;
   }
-
-  .troll-text {
-    display: none;
+  .troll-text { display: none; }
+  .start-game-button, .reset-button {
+    width: 100%; height: auto; font-size: 12px; line-height: 1.7;
   }
-
-  .balance {
-    font-size: 1.2rem;
-    line-height: 25px;
-  }
-
+  .balance, .bet-amount-display { font-size: 12px; line-height: 1.8; }
   .inner-game {
-    width: 100%;
-    height: 70%;
+    width: 100%; height: 100%;
+    min-width: 0;
+    display: grid; grid-template-rows: 190px minmax(120px, 1fr) 250px;
   }
-
-  .right-side {
-    width: 100%;
-    height: 15%;
-    display: flex;
-    flex-direction: row;
+  .dealer, .player { height: 100%; }
+  .h-dealer, .h-player { top: 12px; left: 12px; font-size: 12px; }
+  .right-side-dealer, .right-side-player {
+    width: 100%; height: 100%; float: none;
+    display: flex; flex-direction: column; justify-content: flex-start;
+    gap: 8px; padding: 36px 12px 0;
   }
-
-  .deck-image-div {
-    width: 30%;
-    height: 100%;
-  }
-
-  .play-buttons {
-    width: 70%;
-    height: 100%;
-    flex-direction: row;
-  }
-
-  .start-game-button,
-  .reset-button {
-    width: 120px;
-    height: 40px;
-    font-size: 1rem;
-  }
-
-  .hit-button,
-  .stand-button,
-  .bet-button {
-    width: 30%;
-    height: 60%;
-    font-size: 1.2rem;
-  }
-
-  .logo-title {
-    font-size: 2.5rem;
-    margin-top: 100px;
-  }
-
-  .how-to {
-    font-size: 1.3rem;
-    line-height: 30px;
-  }
-
-  .how-to span {
-    font-size: 1.6rem;
-  }
-
-  .rules-link {
-    font-size: 1rem;
-    padding: 6px;
-  }
-
-  .bet-amount-display {
-    font-size: 1rem;
-    line-height: 30px;
-  }
-
+  .cards-dealer, .cards-player { width: min(100%, 380px); height: 155px; flex-shrink: 0; }
+  .score-dealer, .score-player { font-size: 14px; line-height: 1.4; }
+  .score-player { order: 1; }
+  .score-dealer { position: absolute; top: 12px; right: 12px; }
+  .score-player { position: absolute; top: 12px; right: 12px; max-width: 60%; text-align: right; }
   .result-display {
-    width: 35%;
-    font-size: 0.8rem;
-    line-height: 30px;
+    position: static; width: 100%; height: auto; transform: none;
+    padding: 12px; grid-row: 2; line-height: 1.9;
   }
-
-  .deck-image,
-  .deck-image-second,
-  .deck-image-third {
-    height: calc(var(--card-height) * 0.8);
-  }
-}
-
-@media (max-width: 768px) {
-  :root {
-    --card-height: 140px;
-  }
-
-  .balance {
-    font-size: 1rem;
-    line-height: 20px;
-  }
-
-  .bet-amount-display {
-    font-size: 0.8rem;
-    line-height: 25px;
-  }
-
-  .start-game-button,
-  .reset-button {
-    width: 100px;
-    height: 35px;
-    font-size: 0.7rem;
-  }
-
-  .h-dealer,
-  .h-player {
-    font-size: 0.9rem;
-  }
-
-  .logo-title {
-    font-size: 1.8rem;
-    margin-top: 70px;
-  }
-
-  .how-to {
-    font-size: 1rem;
-    line-height: 25px;
-  }
-
-  .how-to span {
-    font-size: 1.2rem;
-  }
-
-  .rules-link {
-    font-size: 0.7rem;
-    padding: 5px;
-    border: solid 3px var(--text-color);
-  }
-
-  .score-dealer,
-  .score-player {
-    font-size: 1.2rem;
-  }
-
-  .chip {
-    width: 40px;
-    height: 40px;
-    font-size: 0.7rem;
-    border: double 3px var(--text-color);
-  }
-
-  .chip:hover {
-    border: double 3px var(--accent-1);
-  }
-
-  .result-display {
-    width: 40%;
-    left: 20px;
-    font-size: 0.7rem;
-    line-height: 25px;
-  }
-
-  .bet-display {
-    width: 35%;
-    height: 18%;
-  }
-
+  .result-text { font-size: 12px; }
+  .player { grid-row: 3; }
   .chips-player {
-    width: 35%;
-    height: 18%;
+    width: 168px; height: 48px; left: 12px; bottom: 10px;
+    gap: 8px;
   }
-
-  .hit-button,
-  .stand-button,
-  .bet-button {
-    font-size: 1rem;
+  .chip { flex-shrink: 0; width: 48px; height: 48px; font-size: 10px; border-width: 3px; }
+  .chip:hover { border-width: 3px; }
+  .bet-display { width: 100px; height: 48px; left: auto; right: 12px; bottom: 10px; }
+  .right-side { width: 100%; height: auto; }
+  .deck-image-div { display: none; }
+  .play-buttons { width: 100%; height: auto; flex-direction: row; gap: 10px; }
+  .hit-button, .stand-button, .bet-button {
+    flex: 1; min-width: 0; width: auto; height: 52px; font-size: 13px;
   }
+  .logo-title { font-size: clamp(20px, 5vw, 32px); margin-top: 65px; }
+  .how-to { font-size: 12px; line-height: 1.9; }
+  .how-to span { font-size: 14px; }
+  .rules-link { display: inline-block; font-size: 11px; padding: 6px; border-width: 2px; margin-top: 4px; }
 }
 
-@media (max-width: 576px) {
-  :root {
-    --card-height: 110px;
-  }
-
-  .outer-game {
-    width: 98%;
-    height: 95%;
-  }
-
-  .left-side {
-    padding: 10px 5px;
-  }
-
-  .balance {
-    font-size: 0.7rem;
-    line-height: 18px;
-  }
-
-  .bet-amount-display {
-    font-size: 0.6rem;
-    line-height: 20px;
-  }
-
-  .start-game-button,
-  .reset-button {
-    width: 80px;
-    height: 30px;
-    font-size: 0.5rem;
-  }
-
-  .h-dealer {
-    top: 35%;
-    left: 10px;
-    font-size: 0.7rem;
-  }
-
-  .h-player {
-    top: 65%;
-    left: 10px;
-    font-size: 0.7rem;
-  }
-
-  .logo-title {
-    font-size: 1.2rem;
-    margin-top: 50px;
-    text-shadow: -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000,
-      3px 3px 0 #000, 0px 3px 0 #000, 3px 0px 0 #000, 0px -3px 0 #000,
-      -3px 0px 0 #000;
-  }
-
-  .how-to {
-    font-size: 0.7rem;
-    line-height: 18px;
-  }
-
-  .how-to span {
-    font-size: 0.9rem;
-  }
-
-  .rules-link {
-    font-size: 0.5rem;
-    padding: 4px;
-    border: solid 2px var(--text-color);
-  }
-
-  .rules-link:hover {
-    border: solid 2px var(--accent-1);
-  }
-
-  .score-dealer,
-  .score-player {
-    font-size: 0.9rem;
-  }
-
-  .chip {
-    width: 32px;
-    height: 32px;
-    font-size: 0.5rem;
-    border: double 2px var(--text-color);
-  }
-
-  .chip:hover {
-    border: double 2px var(--accent-1);
-  }
-
-  .result-display {
-    width: 45%;
-    left: 10px;
-    font-size: 0.55rem;
-    line-height: 18px;
-  }
-
-  .bet-display {
-    width: 40%;
-    height: 16%;
-    left: 10px;
-  }
-
-  .chips-player {
-    width: 40%;
-    height: 16%;
-    left: 10px;
-    bottom: 10px;
-  }
-
-  .hit-button,
-  .stand-button,
-  .bet-button {
-    font-size: 0.8rem;
-    height: 50%;
-  }
-
-  .deck-image,
-  .deck-image-second,
-  .deck-image-third {
-    height: calc(var(--card-height) * 0.8);
-  }
+@media (max-width: 360px) {
+  .table { padding: 6px; }
+  .outer-game { padding: 8px; }
+  .start-game-button, .reset-button { font-size: 10px; }
+  .balance, .bet-amount-display { font-size: 10px; }
+  .result-text { font-size: 11px; }
 }
 
-@media (max-width: 400px) {
-  :root {
-    --card-height: 90px;
-  }
-
-  .balance,
-  .bet-amount-display {
-    font-size: 0.5rem;
-    line-height: 15px;
-  }
-
-  .start-game-button,
-  .reset-button {
-    width: 70px;
-    height: 25px;
-    font-size: 0.4rem;
-  }
-
-  .h-dealer,
-  .h-player {
-    font-size: 0.6rem;
-  }
-
-  .logo-title {
-    font-size: 1rem;
-    margin-top: 40px;
-  }
-
-  .how-to {
-    font-size: 0.55rem;
-    line-height: 15px;
-  }
-
-  .how-to span {
-    font-size: 0.7rem;
-  }
-
-  .rules-link {
-    font-size: 0.4rem;
-    padding: 3px;
-  }
-
-  .score-dealer,
-  .score-player {
-    font-size: 0.7rem;
-  }
-
-  .chip {
-    width: 28px;
-    height: 28px;
-    font-size: 0.4rem;
-  }
-
-  .result-display {
-    width: 50%;
-    font-size: 0.45rem;
-    line-height: 15px;
-  }
-
-  .hit-button,
-  .stand-button,
-  .bet-button {
-    font-size: 0.6rem;
-  }
-}
-
-@media (max-height: 500px) and (orientation: landscape) {
-  :root {
-    --card-height: 100px;
-  }
-
-  .outer-game {
-    height: 98%;
-  }
-
-  .left-side {
-    height: 12%;
-  }
-
-  .inner-game {
-    height: 76%;
-  }
-
-  .right-side {
-    height: 12%;
-  }
-
-  .balance,
-  .bet-amount-display,
-  .start-game-button,
-  .reset-button {
-    font-size: 0.6rem;
-  }
-
-  .logo-title {
-    font-size: 1.5rem;
-    margin-top: 50px;
-  }
-
-  .how-to {
-    font-size: 0.8rem;
-    line-height: 20px;
-  }
-
-  .result-display {
-    font-size: 0.65rem;
-    line-height: 20px;
-  }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
 }

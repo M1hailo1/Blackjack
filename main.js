@@ -23,7 +23,6 @@ let gameStarted = false;
 let roundStarted = false;
 let canHit = false;
 let stand = false;
-let standFunctionCalled = false;
 let revealDealerCard = false;
 
 let bet = 0;
@@ -49,10 +48,27 @@ let opacityTimeout1 = null;
 let opacityTimeout2 = null;
 let opacityTimeout3 = null;
 
-let prevDealerHand = 0;
-let prevPlayerHand = 0;
+let actionPending = false;
+const gameTimeouts = new Set();
 
-let click;
+function scheduleGameAction(callback, delay) {
+  const timeout = setTimeout(() => {
+    gameTimeouts.delete(timeout);
+    callback();
+  }, delay);
+  gameTimeouts.add(timeout);
+  return timeout;
+}
+
+function cancelGameAction(timeout) {
+  clearTimeout(timeout);
+  gameTimeouts.delete(timeout);
+}
+
+function clearGameTimeouts() {
+  gameTimeouts.forEach(clearTimeout);
+  gameTimeouts.clear();
+}
 
 const buttonClickAudio = new Audio("Audios/buttonClick.mp3");
 const chipClickAudio = new Audio("Audios/chipClick.mp3");
@@ -85,8 +101,8 @@ function buildDeckArray() {
 }
 
 function shuffleDeck() {
-  for (let i = 0; i < deck.length; i++) {
-    const randomIndex = Math.floor(Math.random() * deck.length);
+  for (let i = deck.length - 1; i > 0; i--) {
+    const randomIndex = Math.floor(Math.random() * (i + 1));
     let temp = deck[i];
     deck[i] = deck[randomIndex];
     deck[randomIndex] = temp;
@@ -106,127 +122,78 @@ function startGame() {
 }
 
 function renderHands() {
-  dealerCardsDisplay.innerHTML = "";
-  playerCardsDisplay.innerHTML = "";
-  let pixelOffset = 25;
-  let pixelOffsetY = 0;
-  let pixelRotation = 0;
-
-  dealerHand.forEach((card, index) => {
-    const cardDealerElement = document.createElement("img");
-    cardDealerElement.style.position = "absolute";
-    pixelOffset += 50;
-    if (index % 2 === 0) {
-      pixelOffsetY = 0;
-      pixelRotation = 2;
-    } else {
-      pixelOffsetY += 10;
-      pixelRotation = -2;
-    }
-
-    cardDealerElement.style.left = `${pixelOffset}px`;
-    cardDealerElement.style.top = `${pixelOffsetY}px`;
-    cardDealerElement.style.transform = `rotate(${pixelRotation}deg)`;
-
-    if (index === 0 && !revealDealerCard) {
-      cardDealerElement.src = "Images/svg_playing_cards/backs/blue.svg";
-    } else {
-      cardDealerElement.src = `Images/svg_playing_cards/fronts/${card}.svg`;
-    }
-
-    dealerCardsDisplay.appendChild(cardDealerElement);
-
-    if (index === 0 && revealDealerCard) {
-      cardDealerElement.classList.add("covered-card-animate");
-    }
-
-    if (prevDealerHand === 0) {
-      cardDealerElement.classList.add("card-animate-dealer");
-    } else if (index > 1) {
-      cardDealerElement.classList.add("card-animate-dealer");
-    }
-  });
-
-  pixelOffset = 25;
-  pixelOffsetY = 0;
-  pixelRotation = 0;
-
-  playerHand.forEach((card, index) => {
-    const cardPlayerElement = document.createElement("img");
-    cardPlayerElement.src = `Images/svg_playing_cards/fronts/${card}.svg`;
-    cardPlayerElement.style.position = "absolute";
-    pixelOffset += 50;
-    if (index % 2 === 0) {
-      pixelOffsetY = 0;
-      pixelRotation = 2;
-    } else {
-      pixelOffsetY += 10;
-      pixelRotation = -2;
-    }
-    cardPlayerElement.style.left = `${pixelOffset}px`;
-    cardPlayerElement.style.top = `${pixelOffsetY}px`;
-    cardPlayerElement.style.transform = `rotate(${pixelRotation}deg)`;
-
-    playerCardsDisplay.appendChild(cardPlayerElement);
-
-    if (prevPlayerHand === 0) {
-      cardPlayerElement.classList.add("card-animate-player");
-    } else if (
-      index === playerHand.length - 1 &&
-      playerHand.length > prevPlayerHand
-    ) {
-      cardPlayerElement.classList.add("card-animate-player");
-    }
-  });
+  renderHand(dealerHand, dealerCardsDisplay, true);
+  renderHand(playerHand, playerCardsDisplay, false);
 
   if (revealDealerCard) {
     dealerValueDisplay.textContent = dealerValue;
   } else {
-    let hiddenValue = 0;
-    dealerHand.slice(1).forEach((card) => {
-      let value = card.split("_")[1];
-      if (value === "jack" || value === "queen" || value === "king") {
-        hiddenValue += 10;
-      } else if (value === "ace") {
-        hiddenValue += 11;
-      } else if (!isNaN(value)) {
-        hiddenValue += parseInt(value);
-      }
-    });
-    dealerValueDisplay.textContent = hiddenValue;
+    dealerValueDisplay.textContent = calculateHandValue(dealerHand.slice(1));
   }
 
   playerValueDisplay.textContent = playerValue;
 
-  prevDealerHand = dealerHand.length;
-  prevPlayerHand = playerHand.length;
+}
+
+function renderHand(hand, container, isDealer) {
+  const wasHidden = container.dataset.revealed !== "true";
+  container.dataset.revealed = String(isDealer && revealDealerCard);
+  container.style.setProperty("--hand-size", Math.max(1, hand.length));
+  const existingCards = Array.from(container.querySelectorAll(".playing-card"));
+  const sameHand = existingCards.length <= hand.length &&
+    existingCards.every((image, index) => image.dataset.card === hand[index]);
+  if (!sameHand || existingCards.length === 0) container.replaceChildren();
+  hand.forEach((card, index) => {
+    const existingImage = sameHand ? existingCards[index] : null;
+    const image = existingImage || document.createElement("img");
+    image.dataset.card = card;
+    const hidden = isDealer && index === 0 && !revealDealerCard;
+    const source = hidden
+      ? "Images/svg_playing_cards/backs/blue.svg"
+      : `Images/svg_playing_cards/fronts/${card}.svg`;
+    if (image.getAttribute("src") !== source) image.src = source;
+    image.alt = hidden ? "Hidden dealer card" : card.replace("_", " ");
+    image.classList.add("playing-card");
+    image.style.setProperty("--card-index", index);
+    image.style.setProperty("--card-rotation", index % 2 === 0 ? "2deg" : "-2deg");
+    if (isDealer && index === 0 && revealDealerCard && wasHidden) {
+      image.classList.add("covered-card-animate");
+    } else if (!existingImage) {
+      image.classList.add(isDealer ? "card-animate-dealer" : "card-animate-player");
+    }
+    if (!existingImage) {
+      image.addEventListener("animationend", () => {
+        image.classList.remove("card-animate-dealer", "card-animate-player", "covered-card-animate");
+      });
+      container.appendChild(image);
+    }
+  });
+}
+
+function calculateHandValue(hand) {
+  let total = 0;
+  let aces = 0;
+  hand.forEach((card) => {
+    const value = card.split("_")[1];
+    if (value === "ace") {
+      total += 11;
+      aces++;
+    } else if (["jack", "queen", "king"].includes(value)) {
+      total += 10;
+    } else {
+      total += Number(value);
+    }
+  });
+  while (total > 21 && aces > 0) {
+    total -= 10;
+    aces--;
+  }
+  return total;
 }
 
 function loadValue() {
-  playerValue = 0;
-  dealerValue = 0;
-
-  dealerHand.forEach((card) => {
-    let value = card.split("_")[1];
-    if (value === "jack" || value === "queen" || value === "king") {
-      dealerValue += 10;
-    } else if (value === "ace") {
-      dealerValue += 11;
-    } else if (!isNaN(value)) {
-      dealerValue += parseInt(value);
-    }
-  });
-
-  playerHand.forEach((card) => {
-    let value = card.split("_")[1];
-    if (value === "jack" || value === "queen" || value === "king") {
-      playerValue += 10;
-    } else if (value === "ace") {
-      playerValue += 11;
-    } else if (!isNaN(value)) {
-      playerValue += parseInt(value);
-    }
-  });
+  playerValue = calculateHandValue(playerHand);
+  dealerValue = calculateHandValue(dealerHand);
 }
 
 function dealCard() {
@@ -242,120 +209,73 @@ function dealCard() {
 }
 
 function hitFunction() {
-  if (click > 0) return;
+  if (!roundStarted || !canHit || actionPending) return;
+  actionPending = true;
   resultDisplay.textContent = "You can hit or stand.";
-  if (canHit) {
-    turnCounter++;
-    playerHand.push(dealCard());
-    loadValue();
-    renderHands();
-    handleAces();
-    click++;
-  }
-  setTimeout(() => {
+  turnCounter++;
+  playerHand.push(dealCard());
+  loadValue();
+  renderHands();
+  scheduleGameAction(() => {
+    actionPending = false;
     resultHandler();
-    click = 0;
   }, 800);
-}
-
-function handleAces() {
-  if (playerValue > 21) {
-    playerHand.forEach((card) => {
-      if (card.split("_")[1] === "ace" && playerValue > 21) {
-        playerValue -= 10;
-      }
-    });
-  }
-
-  if (dealerValue > 21) {
-    dealerHand.forEach((card) => {
-      if (card.split("_")[1] === "ace" && dealerValue > 21) {
-        dealerValue -= 10;
-      }
-    });
-  }
-  //renderHands();
-  playerValueDisplay.textContent = playerValue;
 }
 
 function resetVariables() {
   roundStarted = false;
-  standFunctionCalled = false;
   canHit = false;
   stand = false;
-  revealDealerCard = false;
   turnCounter = 0;
   bet = 0;
   betAmountDisplay.textContent = bet;
   Array.from(betDisplay.children).forEach((child) => {
     child.classList.add("chip-animation-gone");
   });
-  setTimeout(() => {
-    betDisplay.innerHTML = "";
+  const settledChips = Array.from(betDisplay.children);
+  scheduleGameAction(() => {
+    settledChips.forEach((chip) => chip.remove());
   }, 280);
 }
 
 function resultHandler() {
-  if (playerValue === 21 && standFunctionCalled === false) {
-    standFunctionCalled = true;
+  if (!roundStarted) return;
+  if (playerValue === 21 && !stand) {
     standFunction();
-  }
-
-  if (playerValue > 21) {
-    resultDisplay.textContent = "You busted! Dealer wins.";
-    canHit = false;
-    revealDealerCard = true;
-    turnCounter = 0;
-    resetVariables();
-    renderHands();
-    playLoseSound();
-    opacitySetter();
-  } else if (dealerValue > 21 && playerValue <= 21) {
-    resultDisplay.textContent = "Dealer busted! You win!";
-    balance = balance + bet * 2;
-    balanceDisplay.textContent = balance;
-    opacitySetter();
-    playWinSound();
-    if (playerValue === 21 && playerHand.length === 2) {
-      resultDisplay.textContent += " Blackjack!";
-    }
-    resetVariables();
-  } else if (dealerValue > playerValue && stand) {
-    resultDisplay.textContent = "Dealer wins!";
-    resetVariables();
-    playLoseSound();
-    opacitySetter();
-  } else if (dealerValue < playerValue && stand) {
-    resultDisplay.textContent = "You win!";
-    balance = balance + bet * 2;
-    balanceDisplay.textContent = balance;
-    opacitySetter();
-    playWinSound();
-    if (playerValue === 21 && playerHand.length === 2) {
-      resultDisplay.textContent += " Blackjack!";
-    }
-    resetVariables();
     return;
   }
+  if (playerValue <= 21 && !stand) return;
 
-  if (dealerValue === playerValue && playerValue === 21) {
+  revealDealerCard = true;
+  let payout = 0;
+  if (playerValue > 21) {
+    resultDisplay.textContent = "You busted! Dealer wins.";
+    playLoseSound();
+  } else if (dealerValue > 21 || playerValue > dealerValue) {
+    resultDisplay.textContent = dealerValue > 21
+      ? "Dealer busted! You win!" : "You win!";
+    if (playerValue === 21 && playerHand.length === 2) {
+      resultDisplay.textContent += " Blackjack!";
+    }
+    payout = bet * 2;
+    playWinSound();
+  } else if (dealerValue === playerValue) {
     resultDisplay.textContent = "It's a tie!";
-    balance = balance + bet;
-    balanceDisplay.textContent = balance;
-    resetVariables();
-    opacitySetter();
-  } else if (dealerValue === playerValue && stand) {
-    resultDisplay.textContent = "It's a tie!";
-    balance = balance + bet;
-    balanceDisplay.textContent = balance;
-    resetVariables();
-    opacitySetter();
+    payout = bet;
+  } else {
+    resultDisplay.textContent = "Dealer wins!";
+    playLoseSound();
   }
+  balance += payout;
+  balanceDisplay.textContent = balance;
+  resetVariables();
+  renderHands();
+  opacitySetter();
 }
 
 function standFunction() {
-  if (click > 0) return;
-  click++;
+  if (!roundStarted || !canHit || actionPending) return;
+  actionPending = true;
   canHit = false;
   stand = true;
   revealDealerCard = true;
@@ -364,33 +284,30 @@ function standFunction() {
   while (dealerValue < 17) {
     dealerHand.push(dealCard());
     loadValue();
-    handleAces();
-    renderHands();
   }
-
-  setTimeout(() => {
-    resultHandler();
-    click = 0;
-  }, 700);
   renderHands();
+  scheduleGameAction(() => {
+    actionPending = false;
+    resultHandler();
+  }, 800);
 }
 
 function opacitySetter() {
-  clearTimeout(opacityTimeout1);
-  clearTimeout(opacityTimeout2);
-  clearTimeout(opacityTimeout3);
+  cancelGameAction(opacityTimeout1);
+  cancelGameAction(opacityTimeout2);
+  cancelGameAction(opacityTimeout3);
 
-  opacityTimeout1 = setTimeout(() => {
+  opacityTimeout1 = scheduleGameAction(() => {
     dealerCardsDisplay.style.opacity = "0.6";
     playerCardsDisplay.style.opacity = "0.6";
   }, 2000);
 
-  opacityTimeout2 = setTimeout(() => {
+  opacityTimeout2 = scheduleGameAction(() => {
     dealerValueDisplay.style.opacity = "0";
     playerValueDisplay.style.opacity = "0";
   }, 5000);
 
-  opacityTimeout3 = setTimeout(() => {
+  opacityTimeout3 = scheduleGameAction(() => {
     dealerValueDisplay.textContent = "Place your bets!";
     playerValueDisplay.textContent = "Never give up!";
     dealerValueDisplay.style.opacity = "1";
@@ -441,19 +358,21 @@ function chipButtonFunction(value, rotateValue, leftPosition, chipCount) {
 
       betChip.classList.add("chip-animation");
 
+      let refunded = false;
       betChip.addEventListener("click", () => {
-        if (!roundStarted) {
+        if (
+          gameStarted && !roundStarted && !refunded &&
+          betChip.isConnected && !betChip.classList.contains("chip-animation-gone")
+        ) {
+          refunded = true;
           playChipSound();
           betChip.classList.add("chip-animation-down");
-          setTimeout(() => {
-            balance += value;
-            bet -= value;
-            chipCount--;
-            betAmountDisplay.textContent = bet;
-            balanceDisplay.textContent = balance;
-            rotateValue -= 15;
-            betChip.remove();
-          }, 280);
+          balance += value;
+          bet -= value;
+          betAmountDisplay.textContent = bet;
+          balanceDisplay.textContent = balance;
+          betChip.style.pointerEvents = "none";
+          scheduleGameAction(() => betChip.remove(), 280);
         }
       });
     } else {
@@ -512,17 +431,20 @@ standButton.addEventListener("click", () => {
 
 resetGameButton.addEventListener("click", () => {
   playButtonSound();
+  clearGameTimeouts();
+  actionPending = false;
+  playerValue = 0;
+  dealerValue = 0;
   gameStarted = false;
   roundStarted = false;
   canHit = false;
   stand = false;
-  standFunctionCalled = false;
   revealDealerCard = false;
   turnCounter = 0;
 
-  clearTimeout(opacityTimeout1);
-  clearTimeout(opacityTimeout2);
-  clearTimeout(opacityTimeout3);
+  cancelGameAction(opacityTimeout1);
+  cancelGameAction(opacityTimeout2);
+  cancelGameAction(opacityTimeout3);
 
   playerHand = [];
   dealerHand = [];
@@ -561,6 +483,8 @@ resetGameButton.addEventListener("click", () => {
                     >RULES</a
                   >
                 </h2>`;
+  dealerValueDisplay.style.opacity = "1";
+  playerValueDisplay.style.opacity = "1";
   dealerValueDisplay.textContent = "";
   playerValueDisplay.textContent = "";
   resultDisplay.textContent = "Game reset! Click Start Game to play again.";
@@ -583,9 +507,9 @@ betButton.addEventListener("click", () => {
           rotateChipValue = 0;
         }
       }
-      clearTimeout(opacityTimeout1);
-      clearTimeout(opacityTimeout2);
-      clearTimeout(opacityTimeout3);
+      cancelGameAction(opacityTimeout1);
+      cancelGameAction(opacityTimeout2);
+      cancelGameAction(opacityTimeout3);
       dealerHand = [];
       playerHand = [];
       playerValue = 0;
@@ -601,15 +525,18 @@ betButton.addEventListener("click", () => {
       resultDisplay.textContent = "";
       renderHands();
       balanceDisplay.textContent = balance;
-      canHit = true;
+      canHit = false;
+      actionPending = true;
       revealDealerCard = false;
       roundStarted = true;
       resultDisplay.textContent = "Dealing cards...";
-      setTimeout(() => {
+      turnCounter = 0;
+      scheduleGameAction(() => {
         dealerHand = dealCard();
         playerHand = dealCard();
         loadValue();
-        handleAces();
+        actionPending = false;
+        canHit = true;
         resultDisplay.textContent = "Game started! You can hit or stand.";
         renderHands();
         turnCounter++;
@@ -618,5 +545,3 @@ betButton.addEventListener("click", () => {
     }
   }
 });
-
-// dodaj funckije da uklonis redudanstonst
