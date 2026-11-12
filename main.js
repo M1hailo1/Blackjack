@@ -3,6 +3,7 @@ const resetGameButton = document.querySelector(".js-reset-button");
 const hitButton = document.querySelector(".js-hit-button");
 const standButton = document.querySelector(".js-stand-button");
 const betButton = document.querySelector(".js-bet-button");
+const muteButton = document.querySelector(".js-mute-button");
 
 const resultDisplay = document.querySelector(".js-result-text");
 const balanceDisplay = document.querySelector(".js-balance-value");
@@ -74,6 +75,43 @@ const buttonClickAudio = new Audio("Audios/buttonClick.mp3");
 const chipClickAudio = new Audio("Audios/chipClick.mp3");
 const winAudio = new Audio("Audios/win.mp3");
 const loseAudio = new Audio("Audios/lose.mp3");
+const gameSounds = [buttonClickAudio, chipClickAudio, winAudio, loseAudio];
+let soundMuted = false;
+try {
+  soundMuted = localStorage.getItem("blackjack.soundMuted") === "true";
+} catch {}
+
+function updateSoundState() {
+  gameSounds.forEach((sound) => {
+    sound.muted = soundMuted;
+    if (soundMuted) {
+      sound.pause();
+      sound.currentTime = 0;
+    }
+  });
+  muteButton.textContent = soundMuted ? "Sound: Off" : "Sound: On";
+  muteButton.setAttribute("aria-pressed", String(soundMuted));
+  muteButton.setAttribute(
+    "aria-label",
+    soundMuted ? "Unmute game sounds" : "Mute game sounds",
+  );
+}
+
+muteButton.addEventListener("click", () => {
+  soundMuted = !soundMuted;
+  updateSoundState();
+  try {
+    localStorage.setItem("blackjack.soundMuted", String(soundMuted));
+  } catch {}
+});
+updateSoundState();
+
+function playSound(sound, volume, startTime = 0) {
+  if (soundMuted) return;
+  sound.volume = volume;
+  sound.currentTime = startTime;
+  sound.play().catch(() => {});
+}
 
 function buildDeckArray() {
   deck = [];
@@ -132,7 +170,6 @@ function renderHands() {
   }
 
   playerValueDisplay.textContent = playerValue;
-
 }
 
 function renderHand(hand, container, isDealer) {
@@ -140,7 +177,8 @@ function renderHand(hand, container, isDealer) {
   container.dataset.revealed = String(isDealer && revealDealerCard);
   container.style.setProperty("--hand-size", Math.max(1, hand.length));
   const existingCards = Array.from(container.querySelectorAll(".playing-card"));
-  const sameHand = existingCards.length <= hand.length &&
+  const sameHand =
+    existingCards.length <= hand.length &&
     existingCards.every((image, index) => image.dataset.card === hand[index]);
   if (!sameHand || existingCards.length === 0) container.replaceChildren();
   hand.forEach((card, index) => {
@@ -155,15 +193,24 @@ function renderHand(hand, container, isDealer) {
     image.alt = hidden ? "Hidden dealer card" : card.replace("_", " ");
     image.classList.add("playing-card");
     image.style.setProperty("--card-index", index);
-    image.style.setProperty("--card-rotation", index % 2 === 0 ? "2deg" : "-2deg");
+    image.style.setProperty(
+      "--card-rotation",
+      index % 2 === 0 ? "2deg" : "-2deg",
+    );
     if (isDealer && index === 0 && revealDealerCard && wasHidden) {
       image.classList.add("covered-card-animate");
     } else if (!existingImage) {
-      image.classList.add(isDealer ? "card-animate-dealer" : "card-animate-player");
+      image.classList.add(
+        isDealer ? "card-animate-dealer" : "card-animate-player",
+      );
     }
     if (!existingImage) {
       image.addEventListener("animationend", () => {
-        image.classList.remove("card-animate-dealer", "card-animate-player", "covered-card-animate");
+        image.classList.remove(
+          "card-animate-dealer",
+          "card-animate-player",
+          "covered-card-animate",
+        );
       });
       container.appendChild(image);
     }
@@ -252,8 +299,8 @@ function resultHandler() {
     resultDisplay.textContent = "You busted! Dealer wins.";
     playLoseSound();
   } else if (dealerValue > 21 || playerValue > dealerValue) {
-    resultDisplay.textContent = dealerValue > 21
-      ? "Dealer busted! You win!" : "You win!";
+    resultDisplay.textContent =
+      dealerValue > 21 ? "Dealer busted! You win!" : "You win!";
     if (playerValue === 21 && playerHand.length === 2) {
       resultDisplay.textContent += " Blackjack!";
     }
@@ -316,27 +363,19 @@ function opacitySetter() {
 }
 
 function playButtonSound() {
-  buttonClickAudio.volume = 0.4;
-  buttonClickAudio.currentTime = 0;
-  buttonClickAudio.play();
+  playSound(buttonClickAudio, 0.4);
 }
 
 function playChipSound() {
-  chipClickAudio.volume = 0.4;
-  chipClickAudio.currentTime = 1.1;
-  chipClickAudio.play();
+  playSound(chipClickAudio, 0.4, 1.1);
 }
 
 function playWinSound() {
-  winAudio.volume = 0.25;
-  winAudio.currentTime = 0;
-  winAudio.play();
+  playSound(winAudio, 0.25);
 }
 
 function playLoseSound() {
-  loseAudio.volume = 0.4;
-  loseAudio.currentTime = 0;
-  loseAudio.play();
+  playSound(loseAudio, 0.4);
 }
 
 function chipButtonFunction(value, rotateValue, leftPosition, chipCount) {
@@ -358,11 +397,15 @@ function chipButtonFunction(value, rotateValue, leftPosition, chipCount) {
 
       betChip.classList.add("chip-animation");
 
+      enableChipDrag(betChip, document.querySelector(".chips-player"));
       let refunded = false;
       betChip.addEventListener("click", () => {
         if (
-          gameStarted && !roundStarted && !refunded &&
-          betChip.isConnected && !betChip.classList.contains("chip-animation-gone")
+          gameStarted &&
+          !roundStarted &&
+          !refunded &&
+          betChip.isConnected &&
+          !betChip.classList.contains("chip-animation-gone")
         ) {
           refunded = true;
           playChipSound();
@@ -380,6 +423,113 @@ function chipButtonFunction(value, rotateValue, leftPosition, chipCount) {
     }
   }
 }
+
+let chipDrag = null;
+
+function cancelChipDrag() {
+  if (!chipDrag) return;
+  chipDrag.ghost?.remove();
+  chipDrag.source.classList.remove("chip-drag-source");
+  chipDrag.target.classList.remove(
+    "bet-drop-active",
+    "bet-drop-hover",
+    "chip-return-target",
+  );
+  if (chipDrag.source.hasPointerCapture(chipDrag.pointerId)) {
+    chipDrag.source.releasePointerCapture(chipDrag.pointerId);
+  }
+  chipDrag = null;
+}
+
+function isOverDropTarget(target, x, y) {
+  const area = target.getBoundingClientRect();
+  return x >= area.left && x <= area.right && y >= area.top && y <= area.bottom;
+}
+
+function enableChipDrag(source, target = betDisplay) {
+  let suppressClick = false;
+  source.addEventListener(
+    "click",
+    (event) => {
+      if (suppressClick && event.detail !== 0) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        suppressClick = false;
+      }
+    },
+    true,
+  );
+  source.addEventListener("pointerdown", (event) => {
+    suppressClick = false;
+    if (
+      !event.isPrimary ||
+      event.button !== 0 ||
+      !gameStarted ||
+      roundStarted ||
+      source.classList.contains("chip-animation-gone") ||
+      source.classList.contains("chip-animation-down")
+    )
+      return;
+    cancelChipDrag();
+    chipDrag = {
+      source,
+      target,
+      pointerId: event.pointerId,
+      x: event.clientX,
+      y: event.clientY,
+      ghost: null,
+    };
+    source.setPointerCapture(event.pointerId);
+  });
+  source.addEventListener("pointermove", (event) => {
+    if (
+      !chipDrag ||
+      chipDrag.source !== source ||
+      chipDrag.pointerId !== event.pointerId
+    )
+      return;
+    if (
+      !chipDrag.ghost &&
+      Math.hypot(event.clientX - chipDrag.x, event.clientY - chipDrag.y) < 7
+    )
+      return;
+    if (!chipDrag.ghost) {
+      suppressClick = true;
+      chipDrag.ghost = document.createElement("div");
+      chipDrag.ghost.className = "chip chip-drag-ghost";
+      chipDrag.ghost.textContent = source.textContent;
+      chipDrag.ghost.setAttribute("aria-hidden", "true");
+      document.body.appendChild(chipDrag.ghost);
+      source.classList.add("chip-drag-source");
+      target.classList.add("bet-drop-active");
+      if (target !== betDisplay) target.classList.add("chip-return-target");
+    }
+    chipDrag.ghost.style.left = `${event.clientX}px`;
+    chipDrag.ghost.style.top = `${event.clientY}px`;
+    target.classList.toggle(
+      "bet-drop-hover",
+      isOverDropTarget(target, event.clientX, event.clientY),
+    );
+  });
+  source.addEventListener("pointerup", (event) => {
+    if (
+      !chipDrag ||
+      chipDrag.source !== source ||
+      chipDrag.pointerId !== event.pointerId
+    )
+      return;
+    const validDrop =
+      chipDrag.ghost && isOverDropTarget(target, event.clientX, event.clientY);
+    cancelChipDrag();
+    if (validDrop && gameStarted && !roundStarted) source.click();
+  });
+  source.addEventListener("pointercancel", cancelChipDrag);
+  source.addEventListener("lostpointercapture", cancelChipDrag);
+}
+
+[chipHundred, chipTwoHundred, chipFiveHundred].forEach((chip) =>
+  enableChipDrag(chip),
+);
 
 chipHundred.addEventListener("click", () => {
   if (!betDisplay.querySelector(".chip[data-value='100']")) {
@@ -430,6 +580,7 @@ standButton.addEventListener("click", () => {
 });
 
 resetGameButton.addEventListener("click", () => {
+  cancelChipDrag();
   playButtonSound();
   clearGameTimeouts();
   actionPending = false;
@@ -496,6 +647,7 @@ resetGameButton.addEventListener("click", () => {
 betButton.addEventListener("click", () => {
   if (gameStarted === true) {
     if (roundStarted === false) {
+      cancelChipDrag();
       playButtonSound();
       if (bet === 0) {
         if (balance === 0) {
